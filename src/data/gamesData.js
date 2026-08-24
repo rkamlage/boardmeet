@@ -1,0 +1,22 @@
+export const TOP_GAMES = [
+  { id: '13', name: 'Catan', icon: '🌾', description: 'Baue Siedlungen und handle mit Rohstoffen.', link: 'https://boardgamegeek.com/boardgame/13' },
+  { id: '822', name: 'Carcassonne', icon: '🏰', description: 'Lege Plättchen und baue eine mittelalterliche Landschaft.', link: 'https://boardgamegeek.com/boardgame/822' },
+  { id: '9209', name: 'Zug um Zug', icon: '🚂', description: 'Sammle Waggonkarten und baue Bahnstrecken.', link: 'https://boardgamegeek.com/boardgame/9209' },
+  { id: '230802', name: 'Azul', icon: '🟦', description: 'Verziere den Palast des Königs mit wunderschönen Fliesen.', link: 'https://boardgamegeek.com/boardgame/230802' },
+  { id: '178900', name: 'Codenames', icon: '🕵️‍♂️', description: 'Finde die Agenten deines Teams anhand von Ein-Wort-Hinweisen.', link: 'https://boardgamegeek.com/boardgame/178900' },
+  { id: '36218', name: 'Dominion', icon: '👑', description: 'Baue das mächtigste Deck aus Aktions- und Geldkarten.', link: 'https://boardgamegeek.com/boardgame/36218' },
+  { id: '167791', name: 'Terraforming Mars', icon: '🚀', description: 'Mache den Mars bewohnbar für die Menschheit.', link: 'https://boardgamegeek.com/boardgame/167791' },
+  { id: '31260', name: 'Agricola', icon: '👨‍🌾', description: 'Baue deinen Bauernhof auf und versorge deine Familie.', link: 'https://boardgamegeek.com/boardgame/31260' },
+  { id: '266192', name: 'Flügelschlag (Wingspan)', icon: '🦅', description: 'Locke Vögel in deine verschiedenen Lebensräume.', link: 'https://boardgamegeek.com/boardgame/266192' },
+  { id: '173346', name: '7 Wonders Duel', icon: '🏛️', description: 'Entwickle deine Zivilisation und errichte Weltwunder.', link: 'https://boardgamegeek.com/boardgame/173346' },
+  { id: '30549', name: 'Pandemic', icon: '🦠', description: 'Rette die Welt als Team vor vier tödlichen Krankheiten.', link: 'https://boardgamegeek.com/boardgame/30549' },
+  { id: '148228', name: 'Splendor', icon: '💎', description: 'Sammle Edelsteine und baue dein Handelsimperium auf.', link: 'https://boardgamegeek.com/boardgame/148228' },
+  { id: '172818', name: 'Blood Rage', icon: '⚔️', description: 'Führe deinen Wikinger-Clan zu Ruhm im Ragnarök.', link: 'https://boardgamegeek.com/boardgame/172818' },
+  { id: '224517', name: 'Brass: Birmingham', icon: '🏭', description: 'Werde zum Industriemagnaten in der industriellen Revolution.', link: 'https://boardgamegeek.com/boardgame/224517' },
+  { id: '169786', name: 'Scythe', icon: '⚙️', description: 'Führe eine Fraktion im alternativen 1920er Europa.', link: 'https://boardgamegeek.com/boardgame/169786' },
+  { id: '161936', name: 'Pandemic Legacy: Season 1', icon: '💊', description: 'Eine kooperative Kampagne, die sich mit jedem Spiel verändert.', link: 'https://boardgamegeek.com/boardgame/161936' },
+  { id: '233078', name: 'Twilight Imperium (4th Ed)', icon: '🌌', description: 'Epische intergalaktische Eroberung und Diplomatie.', link: 'https://boardgamegeek.com/boardgame/233078' },
+  { id: '31260', name: 'Gloomhaven', icon: '🗡️', description: 'Taktischer Koop-Kampf in einer Fantasy-Welt.', link: 'https://boardgamegeek.com/boardgame/174430' },
+  { id: '284083', name: 'Die Crew', icon: '👨‍🚀', description: 'Kooperatives Stichspiel auf der Reise zum 9. Planeten.', link: 'https://boardgamegeek.com/boardgame/284083' },
+  { id: '244521', name: 'Die Quacksalber von Quedlinburg', icon: '🧪', description: 'Braue Tränke, aber pass auf, dass der Kessel nicht explodiert.', link: 'https://boardgamegeek.com/boardgame/244521' }
+];
