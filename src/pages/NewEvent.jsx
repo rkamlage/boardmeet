@@ -15,12 +15,11 @@ export default function NewEvent() {
   });
 
   const [customLocation, setCustomLocation] = useState({ name: '', maxPlayers: 4 });
+  const [recurrence, setRecurrence] = useState('none');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const [recurrence, setRecurrence] = useState('none');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -45,7 +44,7 @@ export default function NewEvent() {
     
     if (recurrence === 'weekly') { count = 4; daysToAdd = 7; }
     if (recurrence === 'biweekly') { count = 4; daysToAdd = 14; }
-    if (recurrence === 'monthly') { count = 4; daysToAdd = 28; } // approx monthly for same weekday
+    if (recurrence === 'monthly') { count = 4; daysToAdd = 28; }
     
     for (let i = 0; i < count; i++) {
       const eventDate = new Date(baseDate);
@@ -64,11 +63,11 @@ export default function NewEvent() {
   };
 
   return (
-    <div>
-      <h2 style={{ marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>Create Event</h2>
+    <div className="space-y-6 max-w-md mx-auto">
+      <h2 className="text-2xl font-bold text-center">Create Event</h2>
       
-      <form onSubmit={handleSubmit} className="card">
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+      <form onSubmit={handleSubmit} className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <label className="flex items-center gap-2 mb-2 font-bold text-text">
           <Edit3 size={18} className="text-primary"/> Event Title
         </label>
         <input 
@@ -76,12 +75,12 @@ export default function NewEvent() {
           name="title"
           value={formData.title}
           onChange={handleChange}
-          className="input-field" 
+          className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-4" 
           placeholder="e.g. Epic Saturday Night"
           required
         />
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+        <label className="flex items-center gap-2 mb-2 font-bold text-text">
           <Calendar size={18} className="text-primary" /> Date & Time
         </label>
         <input 
@@ -89,18 +88,18 @@ export default function NewEvent() {
           name="date"
           value={formData.date}
           onChange={handleChange}
-          className="input-field" 
+          className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-4" 
           required
         />
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+        <label className="flex items-center gap-2 mb-2 font-bold text-text">
           <MapPin size={18} className="text-primary"/> Location
         </label>
         <select 
           name="locationId"
           value={formData.locationId}
           onChange={handleChange}
-          className="input-field"
+          className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-4"
         >
           {locations.map(loc => (
             <option key={loc.id} value={loc.id}>{loc.name} (Max {loc.maxPlayers})</option>
@@ -108,13 +107,38 @@ export default function NewEvent() {
           <option value="custom">+ Neuer Ort (Custom)</option>
         </select>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', marginTop: '1rem', fontWeight: 'bold' }}>
+        {formData.locationId === 'custom' && (
+          <div className="mt-2 p-4 bg-background border border-slate-200 rounded-xl mb-4">
+            <label className="block mb-2 text-sm font-bold text-text">Ort Name</label>
+            <input 
+              type="text"
+              value={customLocation.name}
+              onChange={(e) => setCustomLocation({ ...customLocation, name: e.target.value })}
+              className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 mb-3"
+              placeholder="z.B. Im Garten"
+              required
+            />
+            <label className="flex items-center gap-2 mb-2 text-sm font-bold text-text">
+              <Users size={16} /> Max Spieler
+            </label>
+            <input 
+              type="number"
+              value={customLocation.maxPlayers}
+              onChange={(e) => setCustomLocation({ ...customLocation, maxPlayers: e.target.value })}
+              min="2" max="20"
+              className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+              required
+            />
+          </div>
+        )}
+
+        <label className="flex items-center gap-2 mb-2 font-bold text-text">
           <Calendar size={18} className="text-primary"/> Wiederholung
         </label>
         <select 
           value={recurrence}
           onChange={(e) => setRecurrence(e.target.value)}
-          className="input-field"
+          className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-6"
         >
           <option value="none">Einmaliges Event</option>
           <option value="weekly">Wöchentlich (nächste 4 Wochen)</option>
@@ -122,36 +146,9 @@ export default function NewEvent() {
           <option value="monthly">Monatlich (nächste 4 Termine)</option>
         </select>
 
-        {formData.locationId === 'custom' && (
-          <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-              Ort Name
-            </label>
-            <input 
-              type="text"
-              className="input-field"
-              value={customLocation.name}
-              onChange={(e) => setCustomLocation({ ...customLocation, name: e.target.value })}
-              placeholder="z.B. Im Garten"
-              required
-            />
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', marginTop: '0.5rem', fontSize: '0.9rem' }}>
-              <Users size={16} /> Max Spieler
-            </label>
-            <input 
-              type="number"
-              className="input-field"
-              value={customLocation.maxPlayers}
-              onChange={(e) => setCustomLocation({ ...customLocation, maxPlayers: e.target.value })}
-              min="2" max="20"
-              required
-            />
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
-          <button type="button" className="btn-secondary" onClick={() => navigate(-1)} style={{ flex: 1 }}>Cancel</button>
-          <button type="submit" className="btn-primary" style={{ flex: 2 }}>Create Event</button>
+        <div className="flex gap-3">
+          <button type="button" className="flex-1 bg-background border border-slate-300 text-text font-semibold py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors" onClick={() => navigate(-1)}>Cancel</button>
+          <button type="submit" className="flex-[2] bg-primary hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition-all">Create Event</button>
         </div>
       </form>
     </div>

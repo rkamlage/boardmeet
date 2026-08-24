@@ -52,80 +52,82 @@ export default function Profile() {
   const activeAccessory = ACCESSORIES.find(a => a.id === selectedAccessory);
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <User size={24} className="text-primary" /> Mein Profil
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="flex items-center gap-2 text-2xl font-bold">
+          <User size={28} className="text-primary" /> Mein Profil
         </h2>
-        <button className="btn-secondary" onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}>
-          <LogOut size={14} /> Logout
+        <button className="bg-card border border-slate-200 hover:bg-slate-100 text-muted hover:text-primary font-medium py-1.5 px-3 rounded-xl shadow-sm transition-colors flex items-center gap-1 text-sm" onClick={logout}>
+          <LogOut size={16} /> Logout
         </button>
       </div>
 
-      <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem' }}>
-        
+      <div className="bg-card border border-slate-200 rounded-2xl flex flex-col items-center p-8 shadow-sm">
         {/* Avatar Display */}
-        <div style={{ position: 'relative', width: '100px', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--bg-color)', borderRadius: '50%', fontSize: '4rem', boxShadow: 'var(--shadow-md)', marginBottom: '1rem' }}>
+        <div className="relative w-28 h-28 flex justify-center items-center bg-background rounded-full text-6xl shadow-md border border-slate-100 mb-4">
           🧑
           {/* Overlay Accessory */}
           {activeAccessory && activeAccessory.icon && (
-            <div style={{ position: 'absolute', top: activeAccessory.id === 'glasses' || activeAccessory.id === 'sunglasses' ? '15%' : '-20%', fontSize: '3rem', zIndex: 10 }}>
+            <div className={`absolute text-5xl z-10 drop-shadow-sm ${activeAccessory.id === 'glasses' || activeAccessory.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
               {activeAccessory.icon}
             </div>
           )}
         </div>
 
-        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem' }}>{currentUser.name}</h3>
+        <h3 className="text-2xl font-extrabold text-text m-0">{currentUser.name}</h3>
         
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{totalPoints}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}><Star size={12} /> Punkte</div>
+        <div className="flex gap-6 mt-6 w-full justify-center">
+          <div className="text-center bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
+            <div className="text-2xl font-bold text-primary">{totalPoints}</div>
+            <div className="text-xs text-muted flex items-center gap-1 mt-1 font-medium"><Star size={12} /> Punkte</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{totalWins}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}><Trophy size={12} /> Siege</div>
+          <div className="text-center bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
+            <div className="text-2xl font-bold text-text">{totalWins}</div>
+            <div className="text-xs text-muted flex items-center gap-1 mt-1 font-medium"><Trophy size={12} /> Siege</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{totalEvents}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}><Shield size={12} /> Events</div>
+          <div className="text-center bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
+            <div className="text-2xl font-bold text-text">{totalEvents}</div>
+            <div className="text-xs text-muted flex items-center gap-1 mt-1 font-medium"><Shield size={12} /> Events</div>
           </div>
         </div>
       </div>
 
-      <h3 style={{ marginTop: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <Star size={18} className="text-primary" /> Garderobe & Freischaltungen
+      <h3 className="flex items-center gap-2 text-xl font-bold mt-8 mb-4">
+        <Star size={20} className="text-primary" /> Garderobe & Freischaltungen
       </h3>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="grid grid-cols-2 gap-4">
         {ACCESSORIES.map(acc => {
           const isUnlocked = totalPoints >= acc.cost;
           const isSelected = selectedAccessory === acc.id;
           
           return (
             <div 
-              key={acc.id} 
-              className={`card ${isUnlocked ? 'clickable' : ''}`}
-              style={{ 
-                margin: 0, 
-                padding: '1rem', 
-                textAlign: 'center',
-                opacity: isUnlocked ? 1 : 0.5,
-                border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-                position: 'relative'
-              }}
+              key={acc.id}
               onClick={() => isUnlocked && handleSelect(acc.id)}
+              className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all text-center
+                ${isSelected 
+                  ? 'border-primary bg-indigo-50 shadow-sm' 
+                  : isUnlocked 
+                    ? 'border-slate-200 bg-card hover:border-indigo-200 hover:bg-slate-50 cursor-pointer' 
+                    : 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed grayscale'
+                }
+              `}
             >
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{acc.icon || '👕'}</div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{acc.name}</div>
+              <div className="text-4xl mb-2 min-h-[48px] drop-shadow-sm">{acc.icon}</div>
+              <strong className={`block text-sm ${isSelected ? 'text-primary' : 'text-text'}`}>{acc.name}</strong>
+              <div className="text-xs text-muted mt-1 font-medium">
+                {acc.cost === 0 ? 'Kostenlos' : `${acc.cost} Pts`}
+              </div>
+              
               {!isUnlocked && (
-                <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginTop: '0.5rem', fontWeight: 'bold' }}>
-                  Benötigt {acc.cost} Pkt
+                <div className="text-[10px] text-red-500 font-bold mt-2">
+                  Noch {acc.cost - totalPoints} Pts fehlen
                 </div>
               )}
               {isSelected && (
-                <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
-                  ✓
+                <div className="text-[10px] bg-primary text-white font-bold mt-2 px-2 py-1 rounded-full">
+                  Ausgewählt
                 </div>
               )}
             </div>

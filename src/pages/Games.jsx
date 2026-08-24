@@ -17,7 +17,7 @@ export default function Games() {
         scores[userId].events += 1;
         scores[userId].points += 2; // 2 pts for showing up
       });
-      // Points for winning (we need to account for ev.matches now, but we'll add that later. For now ev.winner)
+      // Points for winning
       if (ev.winner) {
         if (!scores[ev.winner.userId]) scores[ev.winner.userId] = { points: 0, wins: 0, events: 0 };
         scores[ev.winner.userId].wins += 1;
@@ -40,54 +40,53 @@ export default function Games() {
   const leaderboard = calculateLeaderboard();
 
   return (
-    <div>
-      <h2 style={{ marginBottom: 'var(--spacing-md)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <Trophy className="text-primary" /> Leaderboards
+    <div className="space-y-6">
+      <h2 className="flex items-center gap-2 text-2xl font-bold">
+        <Trophy className="text-primary" size={28} /> Leaderboards
       </h2>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+      <div className="flex gap-2 mb-4">
         <button 
-          className={activeTab === 'global' ? 'btn-primary' : 'btn-secondary'} 
+          className={`flex-1 py-2 px-4 rounded-xl font-semibold transition-all ${activeTab === 'global' ? 'bg-primary text-white shadow-md' : 'bg-card border border-slate-200 text-text hover:bg-slate-50'}`}
           onClick={() => setActiveTab('global')}
-          style={{ flex: 1 }}
         >
           Global
         </button>
       </div>
 
       {activeTab === 'global' && (
-        <div className="card">
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <ul className="flex flex-col gap-4">
             {leaderboard.map((item, index) => {
               const accId = userProfiles?.[item.userId]?.accessory || 'none';
               const accObj = ACCESSORIES.find(a => a.id === accId) || {};
 
               return (
-                <li key={item.userId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ fontSize: '1.5rem', width: '30px', textAlign: 'center', fontWeight: 'bold', color: index === 0 ? 'var(--primary)' : 'inherit' }}>
+                <li key={item.userId} className="flex items-center justify-between p-4 bg-background rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-4">
+                    <div className={`text-2xl w-8 text-center font-bold ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-slate-400' : index === 2 ? 'text-amber-600' : 'text-slate-300'}`}>
                       {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
                     </div>
                     
-                    <div style={{ position: 'relative', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--card-bg)', borderRadius: '50%', fontSize: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+                    <div className="relative w-12 h-12 flex justify-center items-center bg-card rounded-full text-2xl shadow-sm border border-slate-100">
                       🧑
                       {accObj.icon && (
-                        <div style={{ position: 'absolute', top: accObj.id === 'glasses' || accObj.id === 'sunglasses' ? '15%' : '-20%', fontSize: '1.2rem', zIndex: 10 }}>
+                        <div className={`absolute text-xl z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
                           {accObj.icon}
                         </div>
                       )}
                     </div>
 
                     <div>
-                      <strong style={{ fontSize: '1.1rem' }}>{formatUserName(item.userId)}</strong>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--muted-text)', display: 'flex', gap: '0.5rem' }}>
-                        <span><Medal size={12} /> {item.wins} Siege</span>
-                        <span><Star size={12} /> {item.events} Events</span>
+                      <strong className="text-lg font-bold text-text">{formatUserName(item.userId)}</strong>
+                      <div className="text-xs text-muted flex gap-3 mt-1 font-medium">
+                        <span className="flex items-center gap-1"><Medal size={14} /> {item.wins} Siege</span>
+                        <span className="flex items-center gap-1"><Star size={14} /> {item.events} Events</span>
                       </div>
                     </div>
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                    {item.points} <span style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}>pts</span>
+                  <div className="text-2xl font-extrabold text-primary flex items-baseline gap-1">
+                    {item.points} <span className="text-xs font-medium text-muted">pts</span>
                   </div>
                 </li>
               );

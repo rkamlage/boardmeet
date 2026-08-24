@@ -9,29 +9,29 @@ export default function GroupDetail() {
   const navigate = useNavigate();
   
   const group = groups.find(g => g.id === id);
-  if (!group) return <div className="container"><p>Group not found</p></div>;
+  if (!group) return <div className="text-center text-muted p-8">Group not found</div>;
 
   const groupEvents = events.filter(e => e.groupId === group.id);
   const isAdmin = group.adminId === currentUser.id;
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
-        <button className="btn-secondary" onClick={() => navigate(-1)} style={{ padding: '0.4rem', borderRadius: '50%' }}>
-          <ChevronLeft size={24} />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <button className="p-2 bg-card hover:bg-slate-100 rounded-full transition-colors shadow-sm border border-slate-200" onClick={() => navigate(-1)}>
+          <ChevronLeft size={24} className="text-text" />
         </button>
-        <h2 style={{ margin: 0, flex: 1, textAlign: 'center' }}>{group.name}</h2>
-        <div style={{ width: 40 }}></div>
+        <h2 className="text-2xl font-bold flex-1 text-center truncate px-4">{group.name}</h2>
+        <div className="w-10"></div>
       </div>
 
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+      <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="flex items-center gap-2 text-lg font-bold">
             <CalendarIcon size={20} className="text-primary" /> Group Events
           </h3>
           {isAdmin && (
             <Link to={`/groups/${group.id}/events/new`}>
-              <button className="btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+              <button className="bg-primary hover:bg-indigo-600 text-white font-semibold py-1.5 px-3 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-1 text-sm">
                 <Plus size={16} /> Event
               </button>
             </Link>
@@ -39,19 +39,19 @@ export default function GroupDetail() {
         </div>
         
         {groupEvents.length === 0 ? (
-          <p style={{ color: 'var(--muted-text)' }}>No events scheduled.</p>
+          <p className="text-muted text-sm">No events scheduled.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="flex flex-col gap-3">
             {groupEvents.map(ev => (
               <Link to={`/events/${ev.id}`} key={ev.id}>
-                <div className="card clickable" style={{ margin: 0, padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="bg-background border border-slate-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition-all flex justify-between items-center group">
                   <div>
-                    <strong style={{ display: 'block', color: 'var(--text-color)' }}>{ev.title}</strong>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--muted-text)', marginTop: '0.25rem' }}>
+                    <strong className="block text-text group-hover:text-primary transition-colors">{ev.title}</strong>
+                    <div className="text-sm text-muted mt-1">
                       {new Date(ev.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} @ {new Date(ev.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
-                  <span className="badge">{ev.attendees.length}/{ev.maxPlayers}</span>
+                  <span className="bg-slate-100 text-muted px-2 py-1 rounded-full text-xs font-semibold">{ev.attendees.length}/{ev.maxPlayers}</span>
                 </div>
               </Link>
             ))}
@@ -59,18 +59,18 @@ export default function GroupDetail() {
         )}
       </div>
 
-      <div className="card">
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 'var(--spacing-md)' }}>
+      <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <h3 className="flex items-center gap-2 text-lg font-bold mb-4">
           <Users size={20} className="text-primary" /> Members ({group.members.length})
         </h3>
-        <ul style={{ listStyle: 'none' }}>
+        <ul className="divide-y divide-slate-100">
           {group.members.map(m => (
-            <li key={m} style={{ padding: '0.75rem 0', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+            <li key={m} className="py-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
                 {m === currentUser.id ? 'Y' : m[0].toUpperCase()}
               </div>
-              <span style={{ flex: 1 }}>{m === currentUser.id ? 'You' : m}</span>
-              {m === group.adminId && <Crown size={16} style={{ color: '#eab308' }} />}
+              <span className="flex-1 font-medium">{m === currentUser.id ? 'You' : m}</span>
+              {m === group.adminId && <Crown size={18} className="text-yellow-500 drop-shadow-sm" />}
             </li>
           ))}
         </ul>
