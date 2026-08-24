@@ -15,7 +15,7 @@ export default function EventDetail() {
   const [bringItem, setBringItem] = useState('');
   
   const event = events.find(e => e.id === id);
-  if (!event) return <div className="container"><p>Event not found</p></div>;
+  if (!event) return <div className="text-center text-muted p-8">Event not found</div>;
 
   const locationObj = locations.find(l => l.id === event.locationId) || { name: 'Unknown' };
 
@@ -81,114 +81,117 @@ END:VCALENDAR`;
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
-        <button className="btn-secondary" onClick={() => navigate(-1)} style={{ padding: '0.4rem', borderRadius: '50%' }}>
-          <ChevronLeft size={24} />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <button className="p-2 bg-card hover:bg-slate-100 rounded-full transition-colors shadow-sm border border-slate-200" onClick={() => navigate(-1)}>
+          <ChevronLeft size={24} className="text-text" />
         </button>
-        <h2 style={{ margin: 0, flex: 1, textAlign: 'center' }}>{event.title}</h2>
-        <div style={{ width: 40 }}></div>
+        <h2 className="text-2xl font-bold flex-1 text-center truncate px-4">{event.title}</h2>
+        <div className="w-10"></div>
       </div>
 
-      <div className="card">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: 'var(--spacing-lg)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ background: 'var(--bg-color)', padding: '0.5rem', borderRadius: 'var(--radius)' }}>
-              <CalendarIcon size={20} className="text-primary" />
+      <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-background p-3 rounded-xl border border-slate-100 shadow-sm">
+              <CalendarIcon size={24} className="text-primary" />
             </div>
             <div>
-              <strong style={{ display: 'block' }}>Date</strong>
-              <span style={{ color: 'var(--muted-text)', fontSize: '0.9rem' }}>{new Date(event.date).toLocaleString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              <strong className="block text-text font-bold">Date</strong>
+              <span className="text-muted text-sm">{new Date(event.date).toLocaleString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
             </div>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ background: 'var(--bg-color)', padding: '0.5rem', borderRadius: 'var(--radius)' }}>
-              <MapPin size={20} className="text-primary" />
+          <div className="flex items-center gap-4">
+            <div className="bg-background p-3 rounded-xl border border-slate-100 shadow-sm">
+              <MapPin size={24} className="text-primary" />
             </div>
             <div>
-              <strong style={{ display: 'block' }}>Location</strong>
-              <span style={{ color: 'var(--muted-text)', fontSize: '0.9rem' }}>{locationObj.name}</span>
+              <strong className="block text-text font-bold">Location</strong>
+              <span className="text-muted text-sm">{locationObj.name}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ background: 'var(--bg-color)', padding: '0.5rem', borderRadius: 'var(--radius)' }}>
-              <Users size={20} className="text-primary" />
+          <div className="flex items-center gap-4">
+            <div className="bg-background p-3 rounded-xl border border-slate-100 shadow-sm">
+              <Users size={24} className="text-primary" />
             </div>
             <div>
-              <strong style={{ display: 'block' }}>Capacity</strong>
-              <span style={{ color: 'var(--muted-text)', fontSize: '0.9rem' }}>{event.attendees.length} / {event.maxPlayers} Players {isFull && <span className="badge badge-primary" style={{ marginLeft: '0.5rem' }}>Full</span>}</span>
+              <strong className="block text-text font-bold">Capacity</strong>
+              <span className="text-muted text-sm">{event.attendees.length} / {event.maxPlayers} Players {isFull && <span className="ml-2 bg-indigo-100 text-primary px-2 py-0.5 rounded-full text-xs font-bold border border-indigo-200">Full</span>}</span>
             </div>
           </div>
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="flex flex-col gap-3">
           <button 
-            className={(isAttending || isWaitlisted) ? "btn-secondary" : "btn-primary"} 
+            className={`w-full py-3 px-4 rounded-xl font-bold text-center transition-all shadow-sm ${
+              (isAttending || isWaitlisted) 
+                ? 'bg-background border border-slate-300 text-text hover:bg-slate-50' 
+                : 'bg-primary text-white hover:bg-indigo-600 hover:shadow-md'
+            }`}
             onClick={handleRSVP}
-            style={{ width: '100%', padding: '0.75rem' }}
           >
             {isAttending ? 'Leave Event' : (isWaitlisted ? 'Leave Waitlist' : (isFull ? 'Join Waitlist' : 'Join Event'))}
           </button>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="flex gap-3">
             {(isAttending || isWaitlisted) && (
-              <button className="btn-secondary" onClick={() => addGuest(event.id)} style={{ flex: 1 }}>
-                <UserPlus size={16} /> Guest
+              <button className="flex-1 bg-background border border-slate-200 text-text font-medium py-2 px-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm" onClick={() => addGuest(event.id)}>
+                <UserPlus size={18} /> Guest
               </button>
             )}
-            <button className="btn-secondary" onClick={exportICS} style={{ flex: 1 }}>
-              <Download size={16} /> Export ICS
+            <button className="flex-1 bg-background border border-slate-200 text-text font-medium py-2 px-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm" onClick={exportICS}>
+              <Download size={18} /> Export ICS
             </button>
           </div>
         </div>
       </div>
 
-      <div className="card">
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 'var(--spacing-md)' }}>
-          <Users size={20} /> Attendees
+      <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <h3 className="flex items-center gap-2 text-lg font-bold mb-5">
+          <Users size={20} className="text-primary" /> Attendees
         </h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="flex flex-wrap gap-6">
           {event.attendees.map(m => {
             const accId = userProfiles?.[m]?.accessory || 'none';
             const accObj = ACCESSORIES.find(a => a.id === accId) || {};
             
             return (
-              <div key={m} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ position: 'relative', width: '48px', height: '48px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--bg-color)', borderRadius: '50%', fontSize: '1.8rem', boxShadow: 'var(--shadow-sm)' }}>
+              <div key={m} className="flex flex-col items-center">
+                <div className="relative w-14 h-14 flex justify-center items-center bg-background rounded-full text-3xl shadow-sm border border-slate-100">
                   🧑
                   {accObj.icon && (
-                    <div style={{ position: 'absolute', top: accObj.id === 'glasses' || accObj.id === 'sunglasses' ? '15%' : '-20%', fontSize: '1.4rem', zIndex: 10 }}>
+                    <div className={`absolute text-2xl z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
                       {accObj.icon}
                     </div>
                   )}
                 </div>
-                <span style={{ fontSize: '0.75rem', marginTop: '0.2rem', fontWeight: 'bold' }}>{formatName(m)}</span>
+                <span className="text-xs mt-2 font-bold text-text truncate max-w-[80px] text-center">{formatName(m)}</span>
               </div>
             );
           })}
         </div>
         
         {event.waitlist.length > 0 && (
-          <div style={{ marginTop: 'var(--spacing-lg)' }}>
-            <h4 style={{ color: 'var(--muted-text)', marginBottom: '0.5rem' }}>Waitlist</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+          <div className="mt-8 pt-6 border-t border-slate-100">
+            <h4 className="text-muted font-bold text-sm mb-4">Waitlist</h4>
+            <div className="flex flex-wrap gap-5">
               {event.waitlist.map((m, idx) => {
                 const accId = userProfiles?.[m]?.accessory || 'none';
                 const accObj = ACCESSORIES.find(a => a.id === accId) || {};
                 
                 return (
-                  <div key={m} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
-                    <div style={{ position: 'relative', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--bg-color)', borderRadius: '50%', fontSize: '1.5rem' }}>
+                  <div key={m} className="flex flex-col items-center opacity-60">
+                    <div className="relative w-12 h-12 flex justify-center items-center bg-background rounded-full text-2xl border border-slate-100">
                       🧑
                       {accObj.icon && (
-                        <div style={{ position: 'absolute', top: accObj.id === 'glasses' || accObj.id === 'sunglasses' ? '15%' : '-20%', fontSize: '1.2rem', zIndex: 10 }}>
+                        <div className={`absolute text-xl z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
                           {accObj.icon}
                         </div>
                       )}
                     </div>
-                    <span style={{ fontSize: '0.7rem', marginTop: '0.2rem' }}>{idx + 1}. {formatName(m)}</span>
+                    <span className="text-[10px] mt-1 font-medium text-text truncate max-w-[70px] text-center">{idx + 1}. {formatName(m)}</span>
                   </div>
                 );
               })}
@@ -197,44 +200,42 @@ END:VCALENDAR`;
         )}
       </div>
 
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Gamepad2 size={20} /> Games
+      <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="flex items-center gap-2 text-lg font-bold">
+            <Gamepad2 size={20} className="text-primary" /> Games
           </h3>
-          <button className="btn-secondary" onClick={() => setShowSearch(!showSearch)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem' }}>
+          <button className="bg-background border border-slate-200 text-text font-medium py-1 px-3 rounded-lg flex items-center justify-center text-sm hover:bg-slate-50 transition-colors" onClick={() => setShowSearch(!showSearch)}>
             {showSearch ? 'Close' : '+ Add Game'}
           </button>
         </div>
         
-        {showSearch && <GameSearch eventId={event.id} />}
+        {showSearch && <div className="mb-6"><GameSearch eventId={event.id} /></div>}
 
         {event.games.length === 0 ? (
-          <p style={{ color: 'var(--muted-text)' }}>No games added yet.</p>
+          <p className="text-muted text-sm">No games added yet.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="flex flex-col gap-3">
             {event.games.map(g => (
-              <div key={g.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
+              <div key={g.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 p-4 bg-background rounded-xl border border-slate-200">
                 <div>
-                  <strong style={{ display: 'block', color: 'var(--text-color)' }}>{g.name}</strong>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
-                    <span className="badge badge-primary">{g.votes.length} votes</span>
-                    <a href={`https://boardgamegeek.com/boardgame/${g.id}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                  <strong className="block text-text font-bold mb-1">{g.name}</strong>
+                  <div className="flex gap-3 items-center">
+                    <span className="bg-indigo-50 text-primary border border-indigo-100 px-2 py-0.5 rounded-full text-xs font-bold">{g.votes.length} votes</span>
+                    <a href={`https://boardgamegeek.com/boardgame/${g.id}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 font-medium">
                       Rules <ExternalLink size={12} />
                     </a>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                <div className="flex flex-col gap-2 min-w-[140px]">
                   <button 
-                    className={g.votes.includes(currentUser.id) ? "btn-primary" : "btn-secondary"} 
-                    style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                    className={`py-1.5 px-3 rounded-lg font-semibold text-sm transition-all shadow-sm ${g.votes.includes(currentUser.id) ? 'bg-primary text-white hover:bg-indigo-600' : 'bg-card border border-slate-200 text-text hover:bg-slate-50'}`}
                     onClick={() => voteGame(event.id, g.id)}
                   >
                     {g.votes.includes(currentUser.id) ? 'Voted' : 'Vote'}
                   </button>
                   <button 
-                    className="btn-secondary" 
-                    style={{ fontSize: '0.7rem', padding: '0.2rem', borderColor: '#eab308', color: '#eab308' }}
+                    className="py-1.5 px-3 rounded-lg font-semibold text-xs transition-all bg-yellow-50 text-yellow-600 border border-yellow-200 hover:bg-yellow-100 shadow-sm"
                     onClick={() => recordMatch(event.id, g.id, currentUser.id)}
                   >
                     Ich habe gewonnen! 🏆
@@ -242,11 +243,11 @@ END:VCALENDAR`;
 
                   {/* Matches List */}
                   {event.matches && event.matches.filter(m => m.gameId === g.id).length > 0 && (
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', background: 'rgba(0,0,0,0.1)', padding: '0.3rem', borderRadius: '4px' }}>
-                      <strong>Siege:</strong>
-                      <ul style={{ margin: 0, paddingLeft: '1rem', color: '#eab308' }}>
+                    <div className="mt-1 text-xs bg-slate-50 border border-slate-100 p-2 rounded-lg">
+                      <strong className="block mb-1 text-slate-500">Siege:</strong>
+                      <ul className="text-yellow-600 font-bold space-y-0.5 ml-1">
                         {event.matches.filter(m => m.gameId === g.id).map(m => (
-                          <li key={m.id}>{formatName(m.winnerId)}</li>
+                          <li key={m.id} className="flex items-center gap-1">🥇 {formatName(m.winnerId)}</li>
                         ))}
                       </ul>
                     </div>
@@ -258,38 +259,37 @@ END:VCALENDAR`;
         )}
       </div>
 
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <ShoppingBag size={20} /> Bring List
+      <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="flex items-center gap-2 text-lg font-bold">
+            <ShoppingBag size={20} className="text-primary" /> Bring List
           </h3>
-          <button className="btn-secondary" onClick={() => setShowBringListInput(!showBringListInput)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem' }}>
+          <button className="bg-background border border-slate-200 text-text font-medium py-1 px-3 rounded-lg flex items-center justify-center text-sm hover:bg-slate-50 transition-colors" onClick={() => setShowBringListInput(!showBringListInput)}>
             {showBringListInput ? 'Close' : '+ Add Item'}
           </button>
         </div>
         
         {showBringListInput && (
-          <form onSubmit={handleAddBringItem} style={{ display: 'flex', gap: '0.5rem', marginBottom: 'var(--spacing-md)' }}>
+          <form onSubmit={handleAddBringItem} className="flex gap-2 mb-6">
             <input 
               type="text" 
               value={bringItem} 
               onChange={(e) => setBringItem(e.target.value)} 
               placeholder="e.g. 2 bags of chips"
-              className="input-field"
-              style={{ marginBottom: 0, flex: 1 }}
+              className="flex-1 p-2 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
-            <button type="submit" className="btn-primary">Add</button>
+            <button type="submit" className="bg-primary hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition-all">Add</button>
           </form>
         )}
 
         {event.bringList.length === 0 ? (
-          <p style={{ color: 'var(--muted-text)' }}>Nothing requested yet.</p>
+          <p className="text-muted text-sm">Nothing requested yet.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="flex flex-col gap-2">
             {event.bringList.map((item) => (
-              <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)' }}>
-                <strong>{item.item}</strong>
-                <span className="badge">{formatName(item.assignee)}</span>
+              <div key={item.id} className="flex justify-between items-center p-3 bg-background rounded-xl border border-slate-200">
+                <strong className="text-text font-medium">{item.item}</strong>
+                <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-bold">{formatName(item.assignee)}</span>
               </div>
             ))}
           </div>

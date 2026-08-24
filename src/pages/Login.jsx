@@ -20,8 +20,6 @@ export default function Login() {
         await login(email, password);
       } else {
         await signup(email, password);
-        // Supabase might require email confirmation, but for now we assume it just works
-        // or auto-confirm is enabled in their dash.
         alert('Account created! You might need to confirm your email.');
       }
     } catch (err) {
@@ -32,50 +30,48 @@ export default function Login() {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 'var(--spacing-md)', background: 'var(--bg-color)' }}>
-      <div className="card" style={{ width: '100%', maxWidth: '400px', textAlign: 'center', padding: '3rem 2rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '50%', marginBottom: '1.5rem', boxShadow: 'var(--shadow-md)' }}>
+    <div className="flex items-center justify-center min-h-screen p-4 bg-background">
+      <div className="bg-card border border-slate-200 w-full max-w-md text-center p-12 rounded-3xl shadow-sm">
+        <div className="inline-flex items-center justify-center bg-primary text-white p-4 rounded-full mb-6 shadow-md shadow-primary/20">
           <Dices size={40} />
         </div>
-        <h2 style={{ marginBottom: '0.5rem', fontSize: '1.8rem', color: 'var(--text-color)' }}>BoardMeet</h2>
-        <p style={{ color: 'var(--muted-text)', marginBottom: '2rem' }}>Organize your game nights effortlessly.</p>
+        <h2 className="mb-2 text-3xl font-extrabold text-text tracking-tight">BoardMeet</h2>
+        <p className="text-muted mb-8 font-medium">Organize your game nights effortlessly.</p>
         
         {error && (
-          <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '0.75rem', borderRadius: 'var(--radius)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+          <div className="bg-red-50 text-red-600 border border-red-100 p-3 rounded-xl mb-6 text-sm font-medium">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input 
             type="email"
-            className="input-field"
+            className="w-full p-4 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ padding: '1rem', marginBottom: '0.75rem' }}
           />
           <input 
             type="password"
-            className="input-field"
+            className="w-full p-4 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ padding: '1rem' }}
           />
-          <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }} disabled={loading}>
+          <button type="submit" className="w-full bg-primary hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-xl shadow-sm shadow-primary/20 hover:shadow-md transition-all text-lg" disabled={loading}>
             {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Sign Up')}
           </button>
         </form>
         
-        <p style={{ marginTop: '1.5rem', color: 'var(--muted-text)', fontSize: '0.85rem' }}>
+        <p className="mt-8 text-muted text-sm font-medium">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button 
             type="button" 
             onClick={() => setIsLogin(!isLogin)} 
-            style={{ color: 'var(--primary)', background: 'none', border: 'none', fontWeight: 'bold', cursor: 'pointer', padding: 0 }}
+            className="text-primary hover:text-indigo-600 font-bold transition-colors"
           >
             {isLogin ? 'Sign up' : 'Sign in'}
           </button>

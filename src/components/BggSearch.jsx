@@ -60,111 +60,105 @@ export default function GameSearch({ eventId }) {
   };
 
   return (
-    <div style={{ marginTop: 'var(--spacing-sm)', padding: 'var(--spacing-sm)', background: 'var(--bg-color)', borderRadius: 'var(--radius)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', padding: '0 0.5rem', marginBottom: '0.75rem' }}>
-        <Search size={16} className="text-primary" />
+    <div className="bg-background rounded-xl p-4 border border-slate-200">
+      <div className="flex items-center bg-card border border-slate-300 rounded-xl px-3 mb-4 shadow-sm focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+        <Search size={18} className="text-slate-400" />
         <input 
           type="text" 
           value={query} 
           onChange={(e) => setQuery(e.target.value)} 
           placeholder="Spiel suchen (z.B. Catan)..."
-          style={{ border: 'none', background: 'transparent', width: '100%', padding: '0.75rem', outline: 'none' }}
+          className="w-full p-3 bg-transparent text-text outline-none font-medium"
         />
       </div>
 
-      <div style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+      <div className="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
         {filteredGames.length > 0 ? (
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <ul className="flex flex-col gap-3">
             {filteredGames.map(g => (
-              <li key={g.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'var(--card-bg)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-                <div style={{ flex: 1, paddingRight: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <li key={g.id} className="flex justify-between items-center p-4 bg-card rounded-xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all">
+                <div className="flex gap-4 items-start flex-1 pr-4">
                   {g.bggImage ? (
-                    <img src={g.bggImage} alt={g.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                    <img src={g.bggImage} alt={g.name} className="w-12 h-12 object-cover rounded-lg shadow-sm border border-slate-100" />
                   ) : (
-                    <div style={{ fontSize: '1.5rem' }}>{g.icon}</div>
+                    <div className="text-3xl drop-shadow-sm w-12 text-center">{g.icon}</div>
                   )}
                   <div>
-                    <strong style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <strong className="flex items-center gap-2 text-text font-bold">
                       {g.name}
-                      {g.isExpansion && <span className="badge" style={{ fontSize: '0.6rem' }}>Erweiterung</span>}
+                      {g.isExpansion && <span className="bg-amber-50 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wide shadow-sm">Erweiterung</span>}
                     </strong>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--muted-text)', marginTop: '0.2rem' }}>
+                    <div className="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
                       {g.description}
                     </div>
-                    <a href={g.link} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.3rem' }}>
-                      BGG <ExternalLink size={10} />
-                    </a>
+                    {g.link && (
+                      <a href={g.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline mt-2 font-bold uppercase tracking-wider">
+                        BGG <ExternalLink size={10} />
+                      </a>
+                    )}
                   </div>
                 </div>
                 <button 
-                  className="btn-primary" 
-                  style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem' }}
+                  className="bg-primary hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg flex items-center justify-center shadow-sm transition-all text-sm shrink-0" 
                   onClick={() => {
                     addGameToEvent(eventId, g.id, g.name);
                     setQuery('');
                   }}
                 >
-                  Hinzufügen
+                  <Plus size={16} />
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', textAlign: 'center', padding: '1rem 0' }}>
-            Kein Spiel gefunden.
-          </p>
+          <div className="text-center py-6">
+            <p className="text-muted text-sm font-medium mb-3">Kein Spiel gefunden.</p>
+            <button 
+              className="text-primary hover:text-indigo-600 font-bold text-sm underline underline-offset-2"
+              onClick={() => setShowAddForm(!showAddForm)}
+            >
+              Nicht dabei? Spiel aus BoardGameGeek hinzufügen
+            </button>
+          </div>
         )}
       </div>
-      
-      {!showAddForm ? (
-        <button 
-          className="btn-secondary" 
-          style={{ width: '100%', marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
-          onClick={() => setShowAddForm(true)}
-        >
-          <Plus size={16} /> Spiel fehlt? Aus Datenbank importieren
-        </button>
-      ) : (
-        <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--card-bg)', borderRadius: 'var(--radius)', border: '1px dashed var(--primary)' }}>
-          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>BoardGameGeek Datenbank durchsuchen</h4>
-          <form onSubmit={handleBggSearch} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+
+      {showAddForm && (
+        <div className="mt-6 pt-6 border-t border-slate-200 bg-card -mx-4 -mb-4 p-6 rounded-b-xl">
+          <h4 className="text-sm font-bold text-text mb-3">Aus BoardGameGeek Datenbank hinzufügen</h4>
+          <form onSubmit={handleBggSearch} className="flex gap-2 mb-4">
             <input 
               type="text" 
-              className="input-field" 
-              placeholder="z.B. Andor" 
               value={bggQuery}
-              onChange={e => setBggQuery(e.target.value)}
+              onChange={(e) => setBggQuery(e.target.value)}
+              placeholder="Exakter Name (z.B. Terraforming Mars)"
+              className="flex-1 p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-sm"
               required
             />
-            <button type="submit" className="btn-primary" disabled={isSearching}>
-              {isSearching ? <Loader size={16} className="spin" /> : 'Suchen'}
+            <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center min-w-[100px]" disabled={isSearching}>
+              {isSearching ? <Loader size={16} className="animate-spin" /> : 'Suchen'}
             </button>
           </form>
 
           {bggResults.length > 0 && (
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <ul className="flex flex-col gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
               {bggResults.map(res => (
-                <li key={res.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)' }}>
+                <li key={res.id} className="flex justify-between items-center p-3 bg-background rounded-xl border border-slate-200 hover:border-slate-300 transition-all">
                   <div>
-                    <strong>{res.name}</strong> <span style={{ color: 'var(--muted-text)', fontSize: '0.8rem' }}>({res.year})</span>
-                    {res.type === 'boardgameexpansion' && <span className="badge" style={{ fontSize: '0.6rem', marginLeft: '0.5rem' }}>Erweiterung</span>}
+                    <strong className="block text-sm text-text">{res.name}</strong>
+                    <span className="text-xs text-muted font-medium">{res.yearpublished ? `(${res.yearpublished})` : ''} - {res.type === 'boardgameexpansion' ? 'Erweiterung' : 'Basisspiel'}</span>
                   </div>
                   <button 
-                    className="btn-secondary" 
-                    style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                    className="bg-primary hover:bg-indigo-600 text-white font-bold py-1.5 px-3 rounded-lg flex items-center gap-1 shadow-sm transition-all text-xs"
                     onClick={() => handleAddBggGame(res)}
                     disabled={isSearching}
                   >
-                    Importieren
+                    <Plus size={14} /> Add
                   </button>
                 </li>
               ))}
             </ul>
           )}
-
-          <button type="button" className="btn-secondary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => { setShowAddForm(false); setBggResults([]); setBggQuery(''); }}>
-            Abbrechen
-          </button>
         </div>
       )}
     </div>
