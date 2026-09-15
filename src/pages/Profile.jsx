@@ -16,8 +16,23 @@ export const ACCESSORIES = [
 export default function Profile() {
   const { currentUser, logout, events, userProfiles, updateUserProfile } = useStore();
   const profile = userProfiles[currentUser?.id] || {};
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editNameValue, setEditNameValue] = useState(profile.name || currentUser?.name || '');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
+  const [editAvatarBase, setEditAvatarBase] = useState('🧑');
+
+  const openEditModal = () => {
+    const p = userProfiles?.[currentUser.id] || {};
+    setEditNameValue(p.name || currentUser.name || '');
+    setEditAvatarBase(p.avatar_base || '🧑');
+    setShowEditModal(true);
+  };
+
+  const saveProfile = () => {
+    if (editNameValue.trim()) {
+      updateUserProfile(currentUser.id, { name: editNameValue.trim(), avatar_base: editAvatarBase });
+      setShowEditModal(false);
+    }
+  };
   
   if (!currentUser) return null;
 
@@ -101,38 +116,15 @@ export default function Profile() {
         {/* Avatar Display */}
         <Avatar userId={currentUser.id} className="w-28 h-28 text-6xl mb-4" accessoryClassName="text-5xl top-[-20%]" />
 
-        {isEditingName ? (
-          <div className="flex gap-2 items-center mt-2 w-full max-w-xs">
-            <input 
-              type="text" 
-              value={editNameValue}
-              onChange={(e) => setEditNameValue(e.target.value)}
-              className="flex-1 p-2 border border-slate-300 rounded-lg text-center font-bold"
-              autoFocus
-            />
-            <button 
-              onClick={() => {
-                if(editNameValue.trim()) {
-                  updateUserProfile(currentUser.id, { name: editNameValue.trim() });
-                  setIsEditingName(false);
-                }
-              }}
-              className="bg-primary text-white p-2 rounded-lg"
-            >
-              Speichern
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 mt-2">
-            <h3 className="text-2xl font-extrabold text-text m-0">{profile.name || currentUser.name}</h3>
-            <button 
-              onClick={() => setIsEditingName(true)}
-              className="text-xs font-bold text-primary bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100"
-            >
-              Ändern
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 mt-2">
+          <h3 className="text-2xl font-extrabold text-text m-0">{profile.name || currentUser.name}</h3>
+          <button 
+            onClick={openEditModal}
+            className="text-xs font-bold text-primary bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100"
+          >
+            Profil bearbeiten
+          </button>
+        </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 w-full">
           <div className="text-center bg-indigo-50 px-4 py-4 rounded-xl border border-indigo-100 shadow-sm">
@@ -178,29 +170,54 @@ export default function Profile() {
         </div>
       )}
 
-      <h3 className="flex items-center gap-2 text-xl font-bold mt-8 mb-4">
-        <User size={20} className="text-primary" /> Avatar wählen
-      </h3>
-      
-      <div 
-        className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 mb-6"
-        onTouchStart={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        {['🧑', '👩', '👨', '🧔‍♂️', '👱‍♀️', '👴', '👵', '🤖', '👽', '👻', '🐶', '🐱'].map(emoji => (
-          <button
-            key={emoji}
-            onClick={() => updateUserProfile(currentUser.id, { avatar_base: emoji })}
-            className={`text-3xl p-3 rounded-2xl border-2 transition-all shrink-0 ${
-              (profile.avatar_base || '🧑') === emoji 
-                ? 'border-primary bg-indigo-50 shadow-sm scale-110' 
-                : 'border-slate-200 bg-card hover:border-indigo-200 hover:bg-slate-50'
-            }`}
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-background w-full max-w-sm rounded-2xl p-6 shadow-xl relative animate-in fade-in zoom-in duration-200">
+            <h2 className="text-xl font-bold mb-4">Profil bearbeiten</h2>
+            
+            <label className="block text-sm font-bold text-text mb-2">Dein Name</label>
+            <input 
+              type="text" 
+              value={editNameValue}
+              onChange={(e) => setEditNameValue(e.target.value)}
+              className="w-full p-3 border border-slate-300 rounded-xl bg-card text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-6 font-bold"
+              placeholder="Wie heißt du?"
+            />
+
+            <label className="block text-sm font-bold text-text mb-2">Avatar Basis</label>
+            <div className="grid grid-cols-4 gap-2 mb-8 max-h-48 overflow-y-auto custom-scrollbar p-1">
+              {['🧑', '👩', '👨', '🧔‍♂️', '👱‍♀️', '👴', '👵', '🤖', '👽', '👻', '🐶', '🐱'].map(emoji => (
+                <button
+                  key={emoji}
+                  onClick={() => setEditAvatarBase(emoji)}
+                  className={`text-2xl p-2 rounded-xl border-2 transition-all ${
+                    editAvatarBase === emoji 
+                      ? 'border-primary bg-indigo-50 shadow-sm scale-110' 
+                      : 'border-slate-200 bg-card hover:border-indigo-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowEditModal(false)}
+                className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+              >
+                Abbrechen
+              </button>
+              <button 
+                onClick={saveProfile}
+                className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:bg-indigo-600 transition-colors shadow-sm"
+              >
+                Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <h3 className="flex items-center gap-2 text-xl font-bold mt-8 mb-4">
         <Star size={20} className="text-primary" /> Garderobe & Freischaltungen
