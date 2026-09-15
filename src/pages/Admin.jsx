@@ -79,7 +79,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-slate-200 p-5 shadow-sm">
+      <div className="bg-card rounded-2xl border border-slate-200 p-5 shadow-sm mb-8">
         <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-2">
           <Gamepad2 size={18} className="text-primary" /> Most Played Games
         </h2>
@@ -100,6 +100,20 @@ export default function Admin() {
         ) : (
           <p className="text-sm text-muted text-center py-4">Not enough data yet.</p>
         )}
+      </div>
+
+      <div className="bg-card rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-2">
+          <Users size={18} className="text-primary" /> Alle Benutzer
+        </h2>
+        <ul className="space-y-3">
+          {Object.entries(userProfiles).map(([id, profile]) => (
+            <li key={id} className="p-3 bg-background rounded-xl border border-slate-100 flex flex-col">
+              <strong className="font-bold text-text">{profile.name || 'Ohne Namen'}</strong>
+              <span className="text-xs text-muted font-medium">{profile.email || 'Keine Email'}</span>
+            </li>
+          ))}
+        </ul>
       </div>
       
       <div className="mt-8 text-center">
