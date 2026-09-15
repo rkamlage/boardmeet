@@ -5,14 +5,16 @@ import { TOP_GAMES } from '../data/gamesData';
 import { searchBgg, getBggDetails } from '../utils/bggApi';
 
 export default function GameSearch({ eventId }) {
+  const { gamesCatalog, addGameToCatalog, addGameToEvent, events } = useStore();
   const [query, setQuery] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);
-  
-  const [bggQuery, setBggQuery] = useState('');
-  const [bggResults, setBggResults] = useState([]);
+  const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog', 'bgg', 'manual'
   
-  const { addGameToEvent, addGameToCatalog, events, gamesCatalog } = useStore();
+  // Manual Entry States
+  const [manualName, setManualName] = useState('');
+  const [manualLink, setManualLink] = useState('');
+  const [manualIcon, setManualIcon] = useState('🎲');
 
   const event = events.find(e => e.id === eventId);
   const existingGameIds = event ? event.games.map(g => g.id) : [];
@@ -26,12 +28,12 @@ export default function GameSearch({ eventId }) {
     g.name.toLowerCase().includes(query.toLowerCase()) && !existingGameIds.includes(g.id)
   );
 
-  const handleBggSearch = async (e) => {
+  const handleSearchBgg = async (e) => {
     e.preventDefault();
-    if (!bggQuery.trim()) return;
+    if (!query.trim()) return;
     setIsSearching(true);
-    const results = await searchBgg(bggQuery);
-    setBggResults(results);
+    const res = await searchBgg(query);
+    setResults(res);
     setIsSearching(false);
   };
 
@@ -41,21 +43,46 @@ export default function GameSearch({ eventId }) {
     setIsSearching(false);
     
     if (details) {
-      const addedGame = await addGameToCatalog({
-        name: details.name,
-        icon: '🎲', // Default icon for BGG imported games
-        description: details.description,
-        isExpansion: bggGame.type === 'boardgameexpansion',
-        bggImage: details.thumbnail
-      });
-      await addGameToEvent(eventId, addedGame.id, addedGame.name);
-      
-      setQuery('');
-      setBggQuery('');
-      setBggResults([]);
-      setShowAddForm(false);
+      try {
+        const addedGame = await addGameToCatalog({
+          name: details.name,
+          icon: '🎲',
+          description: details.description,
+          isExpansion: bggGame.type === 'boardgameexpansion',
+          bggImage: details.thumbnail
+        });
+        await addGameToEvent(eventId, addedGame.id, addedGame.name);
+        setActiveTab('catalog');
+        setQuery('');
+      } catch (err) {
+        // Error already handled in StoreContext
+      }
     } else {
       alert("Fehler beim Laden der Details von BGG.");
+    }
+  };
+
+  const handleAddManualGame = async (e) => {
+    e.preventDefault();
+    if (!manualName.trim()) return;
+    setIsSearching(true);
+    try {
+      const addedGame = await addGameToCatalog({
+        name: manualName,
+        icon: manualIcon,
+        description: manualLink ? `Link: ${manualLink}` : '',
+        isExpansion: false,
+        bggImage: null
+      });
+      await addGameToEvent(eventId, addedGame.id, addedGame.name);
+      setManualName('');
+      setManualLink('');
+      setManualIcon('🎲');
+      setActiveTab('catalog');
+    } catch (err) {
+      // Error handled in StoreContext
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -125,40 +152,44 @@ export default function GameSearch({ eventId }) {
 
       {showAddForm && (
         <div className="mt-6 pt-6 border-t border-slate-200 bg-card -mx-4 -mb-4 p-6 rounded-b-xl">
-          <h4 className="text-sm font-bold text-text mb-3">Aus BoardGameGeek Datenbank hinzufügen</h4>
-          <form onSubmit={handleBggSearch} className="flex gap-2 mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-sm font-bold text-text">Spiel manuell zur Datenbank hinzufügen</h4>
+            <button onClick={() => setShowAddForm(false)} className="text-xs font-bold text-muted hover:text-red-500">Abbrechen</button>
+          </div>
+          
+          <form onSubmit={handleAddManualGame} className="flex flex-col gap-3">
             <input 
               type="text" 
-              value={bggQuery}
-              onChange={(e) => setBggQuery(e.target.value)}
-              placeholder="Exakter Name (z.B. Terraforming Mars)"
-              className="flex-1 p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+              value={manualName}
+              onChange={(e) => setManualName(e.target.value)}
+              placeholder="Name des Spiels (z.B. Monopoly)"
+              className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-sm font-medium"
               required
             />
-            <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center min-w-[100px]" disabled={isSearching}>
-              {isSearching ? <Loader size={16} className="animate-spin" /> : 'Suchen'}
+            
+            <div className="flex gap-3">
+              <input 
+                type="text" 
+                value={manualIcon}
+                onChange={(e) => setManualIcon(e.target.value)}
+                placeholder="Emoji (🎲)"
+                className="w-20 p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary text-center transition-all text-sm"
+                maxLength={2}
+              />
+              <input 
+                type="url" 
+                value={manualLink}
+                onChange={(e) => setManualLink(e.target.value)}
+                placeholder="Link zu Google / BGG (Optional)"
+                className="flex-1 p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary transition-all text-sm"
+              />
+            </div>
+            
+            <button type="submit" className="mt-2 bg-primary hover:bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2" disabled={isSearching}>
+              {isSearching ? <Loader size={16} className="animate-spin" /> : <Plus size={16} />}
+              {isSearching ? 'Speichern...' : 'Spiel erstellen & hinzufügen'}
             </button>
           </form>
-
-          {bggResults.length > 0 && (
-            <ul className="flex flex-col gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-              {bggResults.map(res => (
-                <li key={res.id} className="flex justify-between items-center p-3 bg-background rounded-xl border border-slate-200 hover:border-slate-300 transition-all">
-                  <div>
-                    <strong className="block text-sm text-text">{res.name}</strong>
-                    <span className="text-xs text-muted font-medium">{res.yearpublished ? `(${res.yearpublished})` : ''} - {res.type === 'boardgameexpansion' ? 'Erweiterung' : 'Basisspiel'}</span>
-                  </div>
-                  <button 
-                    className="bg-primary hover:bg-indigo-600 text-white font-bold py-1.5 px-3 rounded-lg flex items-center gap-1 shadow-sm transition-all text-xs"
-                    onClick={() => handleAddBggGame(res)}
-                    disabled={isSearching}
-                  >
-                    <Plus size={14} /> Add
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       )}
     </div>

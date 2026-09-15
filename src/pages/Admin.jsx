@@ -6,24 +6,10 @@ import Onboarding from '../components/Onboarding';
 
 export default function Admin() {
   const { currentUser, userProfiles, groups, events, gamesCatalog } = useStore();
-  const [showOnboardingPreview, setShowOnboardingPreview] = useState(false);
 
   // Check if admin
   if (currentUser?.email !== 'renekamlage@googlemail.com') {
     return <Navigate to="/" replace />;
-  }
-  
-  if (showOnboardingPreview) {
-    return (
-      <div className="relative">
-        <button onClick={() => setShowOnboardingPreview(false)} className="absolute top-4 right-4 z-50 bg-slate-800 text-white px-4 py-2 rounded-xl font-bold shadow-lg">
-          Zurück zum Admin Dashboard
-        </button>
-        <div className="opacity-90 pointer-events-none">
-          <Onboarding onComplete={() => {}} />
-        </div>
-      </div>
-    );
   }
 
   // Calculate some stats
@@ -142,13 +128,6 @@ export default function Admin() {
       </div>
       
       <div className="mt-6 flex flex-col gap-3">
-        <button 
-          onClick={() => setShowOnboardingPreview(true)}
-          className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all flex justify-center items-center gap-2"
-        >
-          <Eye size={18} />
-          Onboarding-Screen ansehen
-        </button>
         <a 
           href="https://supabase.com/dashboard" 
           target="_blank" 

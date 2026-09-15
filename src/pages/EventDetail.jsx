@@ -41,12 +41,12 @@ export default function EventDetail() {
   };
 
   const formatName = (userId) => {
-    if (userId === currentUser.id) return 'You';
+    if (userId === currentUser.id) return `Du (${currentUser.name || userProfiles?.[userId]?.name || 'Ohne Namen'})`;
     if (userId.includes('_guest_')) {
       const parent = userId.split('_guest_')[0];
-      return `${parent === currentUser.id ? 'Your' : parent + "'s"} Guest`;
+      return `${parent === currentUser.id ? 'Dein' : (userProfiles?.[parent]?.name || parent) + 's'} Gast`;
     }
-    return userId;
+    return userProfiles?.[userId]?.name || userId;
   };
 
   const exportICS = () => {
@@ -236,9 +236,15 @@ END:VCALENDAR`;
                   <strong className="block text-text font-bold mb-1">{g.name}</strong>
                   <div className="flex gap-3 items-center">
                     <span className="bg-indigo-50 text-primary border border-indigo-100 px-2 py-0.5 rounded-full text-xs font-bold">{g.votes.length} votes</span>
-                    <a href={`https://boardgamegeek.com/boardgame/${g.id}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 font-medium">
-                      Rules <ExternalLink size={12} />
-                    </a>
+                    {g.description?.startsWith('Link: ') ? (
+                      <a href={g.description.split('Link: ')[1]} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 font-medium">
+                        Info <ExternalLink size={12} />
+                      </a>
+                    ) : (
+                      <a href={`https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(g.name)}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 font-medium">
+                        Info <ExternalLink size={12} />
+                      </a>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 min-w-[140px]">
