@@ -83,7 +83,7 @@ export default function GroupDetail() {
           {group.members.map(m => {
             const accId = userProfiles?.[m]?.accessory || 'none';
             const accObj = ACCESSORIES.find(a => a.id === accId) || {};
-            const displayName = m === currentUser.id ? `Du (${currentUser.name || userProfiles?.[m]?.name || 'Ohne Namen'})` : (userProfiles?.[m]?.name || m);
+            const displayName = m === currentUser.id ? `Du (${userProfiles?.[m]?.name || currentUser.name || 'Ohne Namen'})` : (userProfiles?.[m]?.name || m);
             
             return (
               <li key={m} className="py-3 flex items-center gap-3">

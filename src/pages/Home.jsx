@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 import { Calendar, Users, ArrowRight, Plus } from 'lucide-react';
 
 export default function Home() {
-  const { currentUser, groups, events } = useStore();
+  const { currentUser, groups, events, userProfiles } = useStore();
   
   const userGroups = groups.filter(g => g.members.includes(currentUser.id));
   const userEvents = events.filter(e => e.attendees.includes(currentUser.id) || e.waitlist.includes(currentUser.id));
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-extrabold tracking-tight">Hi, {currentUser.name}! 👋</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">Hi, {userProfiles[currentUser.id]?.name || currentUser.name}! 👋</h1>
       
       <div className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
         <h3 className="flex items-center gap-2 text-lg font-bold mb-4">

@@ -388,7 +388,7 @@ export function StoreProvider({ children }) {
 
   const formatUserName = (userId) => {
     if (currentUser && userId === currentUser.id) {
-      const name = currentUser.name || userProfiles[userId]?.name || 'Ohne Namen';
+      const name = userProfiles[userId]?.name || currentUser.name || 'Ohne Namen';
       return `Du (${name})`;
     }
     if (userId.includes('_guest_')) {

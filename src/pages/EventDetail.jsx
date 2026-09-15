@@ -41,7 +41,7 @@ export default function EventDetail() {
   };
 
   const formatName = (userId) => {
-    if (userId === currentUser.id) return `Du (${currentUser.name || userProfiles?.[userId]?.name || 'Ohne Namen'})`;
+    if (userId === currentUser.id) return `Du (${userProfiles?.[userId]?.name || currentUser.name || 'Ohne Namen'})`;
     if (userId.includes('_guest_')) {
       const parent = userId.split('_guest_')[0];
       return `${parent === currentUser.id ? 'Dein' : (userProfiles?.[parent]?.name || parent) + 's'} Gast`;
