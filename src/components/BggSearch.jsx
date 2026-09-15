@@ -9,7 +9,7 @@ export default function GameSearch({ eventId }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog', 'bgg', 'manual'
+  const [showAddForm, setShowAddForm] = useState(false);
   
   // Manual Entry States
   const [manualName, setManualName] = useState('');
@@ -52,7 +52,7 @@ export default function GameSearch({ eventId }) {
           bggImage: details.thumbnail
         });
         await addGameToEvent(eventId, addedGame.id, addedGame.name);
-        setActiveTab('catalog');
+        setShowAddForm(false);
         setQuery('');
       } catch (err) {
         // Error already handled in StoreContext
@@ -78,7 +78,7 @@ export default function GameSearch({ eventId }) {
       setManualName('');
       setManualLink('');
       setManualIcon('🎲');
-      setActiveTab('catalog');
+      setShowAddForm(false);
     } catch (err) {
       // Error handled in StoreContext
     } finally {
