@@ -67,6 +67,24 @@ export default function Home() {
           </button>
         </Link>
       </div>
+
+      <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 shadow-sm text-white">
+        <h3 className="text-lg font-bold mb-2">Lade Freunde zu BoardMeet ein!</h3>
+        <p className="text-sm text-green-50 mb-4 opacity-90">Teile die App mit deinen Freunden, damit ihr gemeinsam Spieleabende planen könnt.</p>
+        <button 
+          onClick={() => {
+            import('../utils/share').then(({ shareToWhatsApp }) => {
+              const appLink = window.location.origin;
+              const text = `Hey! Ich organisiere meine Brettspielabende jetzt mit BoardMeet. Meld dich auch mal an, dann können wir leichter planen: ${appLink}`;
+              shareToWhatsApp(text, appLink);
+            });
+          }}
+          className="w-full bg-white text-green-600 font-extrabold py-3 px-4 rounded-xl shadow-sm hover:bg-slate-50 hover:shadow-md transition-all flex justify-center items-center gap-2"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          App über WhatsApp empfehlen
+        </button>
+      </div>
     </div>
   );
 }
