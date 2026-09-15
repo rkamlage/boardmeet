@@ -1,6 +1,6 @@
 export const searchBgg = async (query) => {
   try {
-    const res = await fetch(`https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame,boardgameexpansion`);
+    const res = await fetch(`https://api.geekdo.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame,boardgameexpansion`);
     const xml = await res.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, "application/xml");
@@ -23,7 +23,7 @@ export const searchBgg = async (query) => {
 
 export const getBggDetails = async (id) => {
   try {
-    const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${id}`);
+    const res = await fetch(`https://api.geekdo.com/xmlapi2/thing?id=${id}`);
     const xml = await res.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, "application/xml");
