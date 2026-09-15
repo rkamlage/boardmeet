@@ -13,12 +13,14 @@ import EventDetail from './pages/EventDetail';
 import Login from './pages/Login';
 import Games from './pages/Games';
 import Profile from './pages/Profile';
+import Admin from './pages/Admin';
+import Navigation from './components/Navigation';
 
 function App() {
   const { currentUser, authLoading } = useStore();
 
   if (authLoading) {
-    return <div className="flex h-screen w-screen items-center justify-center bg-background text-primary"><div className="animate-spin text-4xl">🎲</div></div>;
+    return <div className="flex h-screen items-center justify-center bg-background"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
   }
 
   if (!currentUser) {
@@ -39,6 +41,7 @@ function App() {
           <Route path="events/:id" element={<EventDetail />} />
           <Route path="games" element={<Games />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

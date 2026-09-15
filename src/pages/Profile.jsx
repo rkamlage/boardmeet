@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { User, Trophy, Shield, Star, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const ACCESSORIES = [
   { id: 'none', icon: '', name: 'Kein Accessoire', cost: 0 },
@@ -91,6 +92,15 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {currentUser?.email === 'renekamlage@googlemail.com' && (
+        <div>
+          <Link to="/admin" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all flex justify-center items-center gap-2">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Admin Dashboard
+          </Link>
+        </div>
+      )}
 
       <h3 className="flex items-center gap-2 text-xl font-bold mt-8 mb-4">
         <Star size={20} className="text-primary" /> Garderobe & Freischaltungen
