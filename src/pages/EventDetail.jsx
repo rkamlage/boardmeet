@@ -8,7 +8,7 @@ import { ACCESSORIES } from './Profile';
 export default function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, userProfiles } = useStore();
+  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, userProfiles, deleteEvent } = useStore();
   
   const [showSearch, setShowSearch] = useState(false);
   const [showBringListInput, setShowBringListInput] = useState(false);
@@ -295,6 +295,24 @@ END:VCALENDAR`;
           </div>
         )}
       </div>
+
+      {event.createdBy === currentUser.id && (
+        <button 
+          onClick={async () => {
+            if (window.confirm('Are you sure you want to delete this event?')) {
+              try {
+                await deleteEvent(event.id);
+                navigate(`/groups/${event.groupId}`);
+              } catch (e) {
+                alert('Error deleting event: ' + e.message);
+              }
+            }
+          }}
+          className="w-full bg-red-50 text-red-600 border border-red-200 font-semibold py-3 px-4 rounded-xl hover:bg-red-100 transition-colors"
+        >
+          Delete Event
+        </button>
+      )}
     </div>
   );
 }

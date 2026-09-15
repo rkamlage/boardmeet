@@ -5,7 +5,7 @@ import { Calendar as CalendarIcon, Users, ChevronLeft, Plus, Crown } from 'lucid
 
 export default function GroupDetail() {
   const { id } = useParams();
-  const { groups, events, currentUser } = useStore();
+  const { groups, events, currentUser, deleteGroup } = useStore();
   const navigate = useNavigate();
   
   const group = groups.find(g => g.id === id);
@@ -75,6 +75,24 @@ export default function GroupDetail() {
           ))}
         </ul>
       </div>
+
+      {isAdmin && (
+        <button 
+          onClick={async () => {
+            if (window.confirm('Are you sure you want to delete this group?')) {
+              try {
+                await deleteGroup(group.id);
+                navigate('/groups');
+              } catch (e) {
+                alert('Error deleting group: ' + e.message);
+              }
+            }
+          }}
+          className="w-full bg-red-50 text-red-600 border border-red-200 font-semibold py-3 px-4 rounded-xl hover:bg-red-100 transition-colors"
+        >
+          Delete Group
+        </button>
+      )}
     </div>
   );
 }

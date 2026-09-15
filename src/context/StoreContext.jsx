@@ -172,6 +172,7 @@ export function StoreProvider({ children }) {
         title: e.title,
         date: e.date,
         maxPlayers: e.max_players,
+        createdBy: e.created_by,
         attendees: [...attendees, ...guestAttendees],
         waitlist: [...waitlist, ...guestWaitlist],
         games: e.event_games?.map(eg => ({
@@ -231,6 +232,25 @@ export function StoreProvider({ children }) {
       if (rsvpError) console.error('Error RSVPing to event:', rsvpError);
       queryClient.invalidateQueries(['events']);
     }
+  };
+
+  const deleteGroup = async (groupId) => {
+    const { error } = await supabase.from('groups').delete().eq('id', groupId);
+    if (error) {
+      console.error('Error deleting group:', error);
+      throw error;
+    }
+    await queryClient.invalidateQueries(['groups']);
+    await queryClient.invalidateQueries(['events']);
+  };
+
+  const deleteEvent = async (eventId) => {
+    const { error } = await supabase.from('events').delete().eq('id', eventId);
+    if (error) {
+      console.error('Error deleting event:', error);
+      throw error;
+    }
+    await queryClient.invalidateQueries(['events']);
   };
 
   const joinEvent = async (eventId) => {
@@ -360,6 +380,8 @@ export function StoreProvider({ children }) {
     addGameToCatalog,
     createGroup,
     createEvent,
+    deleteGroup,
+    deleteEvent,
     joinEvent,
     leaveEvent,
     addGuest,
