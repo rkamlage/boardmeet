@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { Calendar as CalendarIcon, Users, ChevronLeft, Plus, Crown } from 'lucide-react';
+import Avatar from '../components/Avatar';
 import { ACCESSORIES } from './Profile';
 
 export default function GroupDetail() {
@@ -81,20 +82,11 @@ export default function GroupDetail() {
 
         <ul className="divide-y divide-slate-100">
           {group.members.map(m => {
-            const accId = userProfiles?.[m]?.accessory || 'none';
-            const accObj = ACCESSORIES.find(a => a.id === accId) || {};
             const displayName = m === currentUser.id ? `Du (${userProfiles?.[m]?.name || currentUser.name || 'Ohne Namen'})` : (userProfiles?.[m]?.name || m);
             
             return (
               <li key={m} className="py-3 flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold border border-slate-200 text-xl">
-                  🧑
-                  {accObj.icon && (
-                    <div className={`absolute text-sm z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
-                      {accObj.icon}
-                    </div>
-                  )}
-                </div>
+                <Avatar userId={m} className="w-10 h-10 text-xl bg-slate-100" accessoryClassName="text-sm top-[-20%]" />
                 <span className="flex-1 font-medium">{displayName}</span>
                 {m === group.adminId && <Crown size={18} className="text-yellow-500 drop-shadow-sm" />}
               </li>

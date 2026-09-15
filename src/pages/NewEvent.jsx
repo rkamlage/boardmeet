@@ -4,14 +4,16 @@ import { useStore } from '../context/StoreContext';
 import { Calendar, MapPin, Edit3, Users } from 'lucide-react';
 
 export default function NewEvent() {
-  const { id: groupId } = useParams();
-  const { createEvent, locations, addLocation } = useStore();
+  const { id: urlGroupId } = useParams();
+  const { createEvent, locations, addLocation, groups } = useStore();
   const navigate = useNavigate();
+
+  const [selectedGroupId, setSelectedGroupId] = useState(urlGroupId || (groups?.[0]?.id || ''));
 
   const [formData, setFormData] = useState({
     title: '',
     date: '',
-    locationId: locations[0]?.id || 'custom'
+    locationId: 'custom' // We'll set this below properly
   });
 
   const [customLocation, setCustomLocation] = useState({ name: '', maxPlayers: 4 });
@@ -23,6 +25,11 @@ export default function NewEvent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedGroupId) {
+      alert('Bitte eine Gruppe auswählen');
+      return;
+    }
+    
     let locId = formData.locationId;
     let maxPlayers = 4;
 
@@ -52,7 +59,7 @@ export default function NewEvent() {
       eventDate.setDate(eventDate.getDate() + (i * daysToAdd));
       
       promises.push(createEvent({
-        groupId,
+        groupId: selectedGroupId,
         title: count > 1 ? `${formData.title} (#${i + 1})` : formData.title,
         date: eventDate.toISOString().slice(0, 16),
         locationId: locId,
@@ -61,14 +68,43 @@ export default function NewEvent() {
     }
 
     await Promise.all(promises);
-    navigate(`/groups/${groupId}`);
+    navigate(`/groups/${selectedGroupId}`);
   };
+
+  const currentGroupMembers = groups.find(g => g.id === selectedGroupId)?.members || [];
+  const groupLocations = locations.filter(l => !l.createdBy || currentGroupMembers.includes(l.createdBy));
+
+  // Ensure locationId is valid when switching groups
+  React.useEffect(() => {
+    if (formData.locationId !== 'custom' && !groupLocations.some(l => l.id === formData.locationId)) {
+      setFormData(prev => ({ ...prev, locationId: groupLocations.length > 0 ? groupLocations[0].id : 'custom' }));
+    }
+  }, [selectedGroupId, groupLocations.length]);
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-center">Create Event</h2>
       
       <form onSubmit={handleSubmit} className="bg-card border border-slate-200 rounded-2xl p-6 shadow-sm">
+        
+        {!urlGroupId && (
+          <>
+            <label className="flex items-center gap-2 mb-2 font-bold text-text">
+              <Users size={18} className="text-primary"/> Gruppe
+            </label>
+            <select 
+              value={selectedGroupId}
+              onChange={(e) => setSelectedGroupId(e.target.value)}
+              className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-4" 
+              required
+            >
+              {groups?.map(g => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+          </>
+        )}
+
         <label className="flex items-center gap-2 mb-2 font-bold text-text">
           <Edit3 size={18} className="text-primary"/> Event Title
         </label>
@@ -103,7 +139,7 @@ export default function NewEvent() {
           onChange={handleChange}
           className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-4"
         >
-          {locations.map(loc => (
+          {groupLocations.map(loc => (
             <option key={loc.id} value={loc.id}>{loc.name} (Max {loc.maxPlayers})</option>
           ))}
           <option value="custom">+ Neuer Ort (Custom)</option>

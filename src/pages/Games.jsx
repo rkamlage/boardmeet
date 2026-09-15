@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { Trophy, Medal, Star } from 'lucide-react';
+import { Trophy, Star, Medal } from 'lucide-react';
+import Avatar from '../components/Avatar';
 import { ACCESSORIES } from './Profile';
 
 export default function Games() {
@@ -68,14 +69,7 @@ export default function Games() {
                       {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
                     </div>
                     
-                    <div className="relative w-12 h-12 flex justify-center items-center bg-card rounded-full text-2xl shadow-sm border border-slate-100">
-                      🧑
-                      {accObj.icon && (
-                        <div className={`absolute text-xl z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
-                          {accObj.icon}
-                        </div>
-                      )}
-                    </div>
+                    <Avatar userId={item.userId} className="w-12 h-12 text-2xl bg-card" accessoryClassName="text-xl top-[-20%]" />
 
                     <div>
                       <strong className="text-lg font-bold text-text">{formatUserName(item.userId)}</strong>

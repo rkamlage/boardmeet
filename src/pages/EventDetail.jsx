@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import GameSearch from '../components/BggSearch';
+import Avatar from '../components/Avatar';
 import { Calendar as CalendarIcon, MapPin, Users, Download, ChevronLeft, UserPlus, ShoppingBag, Gamepad2, Trophy, ExternalLink } from 'lucide-react';
 import { ACCESSORIES } from './Profile';
 
 export default function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, removeMatch, userProfiles, deleteEvent } = useStore();
+  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, removeMatch, userProfiles, deleteEvent, assignBringListItem, removeBringListItem } = useStore();
   
   const [showSearch, setShowSearch] = useState(false);
   const [showBringListInput, setShowBringListInput] = useState(false);
@@ -135,13 +136,13 @@ END:VCALENDAR`;
             {isAttending ? 'Leave Event' : (isWaitlisted ? 'Leave Waitlist' : (isFull ? 'Join Waitlist' : 'Join Event'))}
           </button>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             {(isAttending || isWaitlisted) && (
-              <button className="flex-1 bg-background border border-slate-200 text-text font-medium py-2 px-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm" onClick={() => addGuest(event.id)}>
+              <button className="flex-1 min-w-[100px] bg-background border border-slate-200 text-text font-medium py-2 px-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm" onClick={() => addGuest(event.id)}>
                 <UserPlus size={18} /> Guest
               </button>
             )}
-            <button onClick={exportICS} className="flex-1 bg-card border border-slate-200 text-text font-semibold py-2.5 px-4 rounded-xl flex justify-center items-center gap-2 hover:bg-slate-50 transition-all shadow-sm">
+            <button onClick={exportICS} className="flex-1 min-w-[100px] bg-card border border-slate-200 text-text font-semibold py-2.5 px-4 rounded-xl flex justify-center items-center gap-2 hover:bg-slate-50 transition-all shadow-sm">
               <Download size={18} /> Kalender
             </button>
             <button 
@@ -153,7 +154,7 @@ END:VCALENDAR`;
                   shareToWhatsApp(text, eventLink);
                 });
               }}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-xl flex justify-center items-center gap-2 transition-all shadow-sm"
+              className="flex-1 min-w-[100px] bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-xl flex justify-center items-center gap-2 transition-all shadow-sm"
             >
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> 
               Teilen
@@ -167,48 +168,24 @@ END:VCALENDAR`;
           <Users size={20} className="text-primary" /> Attendees
         </h3>
         <div className="flex flex-wrap gap-6">
-          {event.attendees.map(m => {
-            const accId = userProfiles?.[m]?.accessory || 'none';
-            const accObj = ACCESSORIES.find(a => a.id === accId) || {};
-            
-            return (
-              <div key={m} className="flex flex-col items-center">
-                <div className="relative w-14 h-14 flex justify-center items-center bg-background rounded-full text-3xl shadow-sm border border-slate-100">
-                  🧑
-                  {accObj.icon && (
-                    <div className={`absolute text-2xl z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
-                      {accObj.icon}
-                    </div>
-                  )}
-                </div>
-                <span className="text-xs mt-2 font-bold text-text truncate max-w-[80px] text-center">{formatName(m)}</span>
-              </div>
-            );
-          })}
+          {event.attendees.map(m => (
+            <div key={m} className="flex flex-col items-center">
+              <Avatar userId={m} className="w-14 h-14 text-3xl" accessoryClassName="text-2xl top-[-20%]" />
+              <span className="text-xs mt-2 font-bold text-text truncate max-w-[80px] text-center">{formatName(m)}</span>
+            </div>
+          ))}
         </div>
         
         {event.waitlist.length > 0 && (
           <div className="mt-8 pt-6 border-t border-slate-100">
             <h4 className="text-muted font-bold text-sm mb-4">Waitlist</h4>
             <div className="flex flex-wrap gap-5">
-              {event.waitlist.map((m, idx) => {
-                const accId = userProfiles?.[m]?.accessory || 'none';
-                const accObj = ACCESSORIES.find(a => a.id === accId) || {};
-                
-                return (
-                  <div key={m} className="flex flex-col items-center opacity-60">
-                    <div className="relative w-12 h-12 flex justify-center items-center bg-background rounded-full text-2xl border border-slate-100">
-                      🧑
-                      {accObj.icon && (
-                        <div className={`absolute text-xl z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
-                          {accObj.icon}
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-[10px] mt-1 font-medium text-text truncate max-w-[70px] text-center">{idx + 1}. {formatName(m)}</span>
-                  </div>
-                );
-              })}
+              {event.waitlist.map((m, idx) => (
+                <div key={m} className="flex flex-col items-center opacity-60">
+                  <Avatar userId={m} className="w-12 h-12 text-2xl" accessoryClassName="text-xl top-[-20%]" />
+                  <span className="text-[10px] mt-1 font-medium text-text truncate max-w-[70px] text-center">{idx + 1}. {formatName(m)}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -287,7 +264,7 @@ END:VCALENDAR`;
                             {event.createdBy === currentUser.id && (
                               <button 
                                 onClick={() => removeMatch(m.id)}
-                                className="text-red-400 hover:text-red-600 px-2 rounded opacity-0 group-hover/match:opacity-100 transition-opacity"
+                                className="text-red-400 hover:text-red-600 px-2 rounded md:opacity-0 md:group-hover/match:opacity-100 transition-opacity"
                                 title="Sieg entfernen"
                               >
                                 ✖
@@ -332,26 +309,60 @@ END:VCALENDAR`;
         </div>
         
         {showBringListInput && (
-          <form onSubmit={handleAddBringItem} className="flex gap-2 mb-6">
-            <input 
-              type="text" 
-              value={bringItem} 
-              onChange={(e) => setBringItem(e.target.value)} 
-              placeholder="e.g. 2 bags of chips"
-              className="flex-1 p-2 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-            <button type="submit" className="bg-primary hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition-all">Add</button>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (bringItem.trim()) {
+                const assignee = e.target.assignee.value;
+                addBringListItem(event.id, bringItem.trim(), assignee === 'unassigned' ? null : assignee);
+                setBringItem('');
+                setShowBringListInput(false);
+              }
+            }} 
+            className="flex flex-col gap-2 mb-6"
+          >
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                value={bringItem} 
+                onChange={(e) => setBringItem(e.target.value)} 
+                placeholder="z.B. 2 Tüten Chips"
+                className="flex-1 p-2 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+              />
+              <select name="assignee" className="p-2 border border-slate-300 rounded-xl bg-background text-text">
+                <option value="unassigned">Offen lassen</option>
+                <option value={currentUser.id}>Ich bring's mit</option>
+                {event.attendees.filter(a => a !== currentUser.id).map(a => (
+                  <option key={a} value={a}>{formatName(a)}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="w-full bg-primary hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition-all">Add</button>
           </form>
         )}
 
         {event.bringList.length === 0 ? (
-          <p className="text-muted text-sm">Nothing requested yet.</p>
+          <p className="text-muted text-sm">Noch keine Sachen eingetragen.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {event.bringList.map((item) => (
               <div key={item.id} className="flex justify-between items-center p-3 bg-background rounded-xl border border-slate-200">
                 <strong className="text-text font-medium">{item.item}</strong>
-                <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-bold">{formatName(item.assignee)}</span>
+                {item.assignee ? (
+                  <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-2">
+                    {formatName(item.assignee)}
+                    {event.createdBy === currentUser.id && (
+                      <button onClick={() => removeBringListItem(event.id, item.id)} className="text-red-400 hover:text-red-600">✖</button>
+                    )}
+                  </span>
+                ) : (
+                  <button 
+                    className="bg-indigo-50 hover:bg-indigo-100 text-primary px-3 py-1.5 rounded-full text-xs font-bold transition-colors shadow-sm border border-indigo-100"
+                    onClick={() => assignBringListItem(item.id, currentUser.id)}
+                  >
+                    🙋 Ich bring's mit
+                  </button>
+                )}
               </div>
             ))}
           </div>

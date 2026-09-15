@@ -76,10 +76,10 @@ export default function GameSearch({ eventId }) {
                   ) : (
                     <div className="text-3xl drop-shadow-sm w-12 text-center">{g.icon}</div>
                   )}
-                  <div>
-                    <strong className="flex items-center gap-2 text-text font-bold">
-                      {g.name}
-                      {g.isExpansion && <span className="bg-amber-50 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wide shadow-sm">Erweiterung</span>}
+                  <div className="min-w-0 flex-1">
+                    <strong className="flex flex-wrap items-center gap-2 text-text font-bold">
+                      <span className="truncate max-w-full block">{g.name}</span>
+                      {g.isExpansion && <span className="bg-amber-50 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wide shadow-sm shrink-0">Erweiterung</span>}
                     </strong>
                     <div className="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
                       {g.description}

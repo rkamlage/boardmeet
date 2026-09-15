@@ -1,11 +1,14 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Users, Calendar, LogOut, Trophy, User } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+
+import { useSwipeable } from 'react-swipeable';
 
 export default function Layout() {
   const { logout } = useStore();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const getNavColor = (path) => {
     if (path === '/' && location.pathname === '/') return 'text-primary';
@@ -13,8 +16,28 @@ export default function Layout() {
     return 'text-muted';
   };
 
+  const TABS = ['/', '/groups', '/events', '/games', '/profile'];
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      const idx = TABS.indexOf(location.pathname);
+      if (idx !== -1 && idx < TABS.length - 1) {
+        navigate(TABS[idx + 1]);
+      }
+    },
+    onSwipedRight: () => {
+      const idx = TABS.indexOf(location.pathname);
+      if (idx !== -1 && idx > 0) {
+        navigate(TABS[idx - 1]);
+      }
+    },
+    preventScrollOnSwipe: false,
+    trackTouch: true,
+    trackMouse: false
+  });
+
   return (
-    <div className="flex flex-col min-h-screen bg-background text-text">
+    <div {...handlers} className="flex flex-col min-h-screen bg-background text-text">
       {/* Top Desktop/Mobile Nav */}
       <nav className="flex justify-between items-center p-4 bg-card border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <Link to="/" className="font-extrabold text-2xl text-primary tracking-tight">🎲 BoardMeet</Link>

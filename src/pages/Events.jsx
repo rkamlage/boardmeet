@@ -16,6 +16,9 @@ export default function Events() {
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <Calendar size={28} className="text-primary" /> My Events
         </h2>
+        <Link to="/events/new" className="bg-primary hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-all flex items-center gap-2 text-sm">
+          + Event
+        </Link>
       </div>
       
       {userEvents.length === 0 ? (

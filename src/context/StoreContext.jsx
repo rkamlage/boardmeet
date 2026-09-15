@@ -155,7 +155,8 @@ export function StoreProvider({ children }) {
     return rawLocations.map(l => ({
       id: l.id,
       name: l.name,
-      maxPlayers: l.max_players
+      maxPlayers: l.max_players,
+      createdBy: l.created_by
     }));
   }, [rawLocations]);
 
@@ -357,7 +358,12 @@ export function StoreProvider({ children }) {
   };
 
   const addBringListItem = async (eventId, item, assignee) => {
-    await supabase.from('bring_list').insert({ event_id: eventId, item, assignee_id: assignee });
+    await supabase.from('bring_list').insert({ event_id: eventId, item, assignee_id: assignee || null });
+    queryClient.invalidateQueries(['events']);
+  };
+
+  const assignBringListItem = async (itemId, assignee) => {
+    await supabase.from('bring_list').update({ assignee_id: assignee }).eq('id', itemId);
     queryClient.invalidateQueries(['events']);
   };
 
@@ -429,6 +435,7 @@ export function StoreProvider({ children }) {
     leaveEvent,
     addGuest,
     addBringListItem,
+    assignBringListItem,
     removeBringListItem,
     addGameToEvent,
     removeGameFromEvent,

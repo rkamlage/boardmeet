@@ -56,6 +56,7 @@ function App() {
           <Route path="/groups/:id/join" element={<JoinGroup />} />
           <Route path="/groups/:id/events/new" element={<NewEvent />} />
           <Route path="events" element={<Events />} />
+          <Route path="events/new" element={<NewEvent />} />
           <Route path="events/:id" element={<EventDetail />} />
           <Route path="games" element={<Games />} />
           <Route path="profile" element={<Profile />} />

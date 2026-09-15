@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { User, Trophy, Shield, Star, LogOut, Activity, Gamepad2, PieChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Avatar from '../components/Avatar';
 
 export const ACCESSORIES = [
   { id: 'none', icon: '', name: 'Kein Accessoire', cost: 0 },
@@ -98,15 +99,7 @@ export default function Profile() {
 
       <div className="bg-card border border-slate-200 rounded-2xl flex flex-col items-center p-8 shadow-sm">
         {/* Avatar Display */}
-        <div className="relative w-28 h-28 flex justify-center items-center bg-background rounded-full text-6xl shadow-md border border-slate-100 mb-4">
-          🧑
-          {/* Overlay Accessory */}
-          {activeAccessory && activeAccessory.icon && (
-            <div className={`absolute text-5xl z-10 drop-shadow-sm ${activeAccessory.id === 'glasses' || activeAccessory.id === 'sunglasses' ? 'top-[28%]' : 'top-[-20%]'}`}>
-              {activeAccessory.icon}
-            </div>
-          )}
-        </div>
+        <Avatar userId={currentUser.id} className="w-28 h-28 text-6xl mb-4" accessoryClassName="text-5xl top-[-20%]" />
 
         {isEditingName ? (
           <div className="flex gap-2 items-center mt-2 w-full max-w-xs">
@@ -184,6 +177,26 @@ export default function Profile() {
           </Link>
         </div>
       )}
+
+      <h3 className="flex items-center gap-2 text-xl font-bold mt-8 mb-4">
+        <User size={20} className="text-primary" /> Avatar wählen
+      </h3>
+      
+      <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 mb-6">
+        {['🧑', '👩', '👨', '🧔‍♂️', '👱‍♀️', '👴', '👵', '🤖', '👽', '👻', '🐶', '🐱'].map(emoji => (
+          <button
+            key={emoji}
+            onClick={() => updateUserProfile(currentUser.id, { avatarBase: emoji })}
+            className={`text-3xl p-3 rounded-2xl border-2 transition-all shrink-0 ${
+              (profile.avatarBase || '🧑') === emoji 
+                ? 'border-primary bg-indigo-50 shadow-sm scale-110' 
+                : 'border-slate-200 bg-card hover:border-indigo-200 hover:bg-slate-50'
+            }`}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
 
       <h3 className="flex items-center gap-2 text-xl font-bold mt-8 mb-4">
         <Star size={20} className="text-primary" /> Garderobe & Freischaltungen
