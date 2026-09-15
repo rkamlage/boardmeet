@@ -253,6 +253,22 @@ export function StoreProvider({ children }) {
     await queryClient.invalidateQueries(['events']);
   };
 
+  const joinGroup = async (groupId) => {
+    const { error } = await supabase.from('group_members').insert({
+      group_id: groupId,
+      user_id: currentUser.id,
+      role: 'member'
+    });
+    if (error) {
+      // If it's a unique constraint error (already in group), that's fine
+      if (error.code !== '23505') {
+        console.error('Error joining group:', error);
+        throw error;
+      }
+    }
+    await queryClient.invalidateQueries(['groups']);
+  };
+
   const joinEvent = async (eventId) => {
     const ev = rawEvents.find(e => e.id === eventId);
     if (!ev) return;
@@ -379,6 +395,7 @@ export function StoreProvider({ children }) {
     addLocation,
     addGameToCatalog,
     createGroup,
+    joinGroup,
     createEvent,
     deleteGroup,
     deleteEvent,

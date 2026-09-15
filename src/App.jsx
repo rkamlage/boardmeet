@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Groups from './pages/Groups';
 import NewGroup from './pages/NewGroup';
 import GroupDetail from './pages/GroupDetail';
+import JoinGroup from './pages/JoinGroup';
 import Events from './pages/Events';
 import NewEvent from './pages/NewEvent';
 import EventDetail from './pages/EventDetail';
@@ -29,10 +30,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="groups" element={<Groups />} />
-          <Route path="groups/new" element={<NewGroup />} />
-          <Route path="groups/:id" element={<GroupDetail />} />
-          <Route path="groups/:groupId/events/new" element={<NewEvent />} />
+          <Route path="/groups" element={<Groups />} />
+          <Route path="/groups/new" element={<NewGroup />} />
+          <Route path="/groups/:id" element={<GroupDetail />} />
+          <Route path="/groups/:id/join" element={<JoinGroup />} />
+          <Route path="/groups/:id/events/new" element={<NewEvent />} />
           <Route path="events" element={<Events />} />
           <Route path="events/:id" element={<EventDetail />} />
           <Route path="games" element={<Games />} />
