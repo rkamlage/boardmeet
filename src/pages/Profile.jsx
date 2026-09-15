@@ -190,9 +190,9 @@ export default function Profile() {
         {['🧑', '👩', '👨', '🧔‍♂️', '👱‍♀️', '👴', '👵', '🤖', '👽', '👻', '🐶', '🐱'].map(emoji => (
           <button
             key={emoji}
-            onClick={() => updateUserProfile(currentUser.id, { avatarBase: emoji })}
+            onClick={() => updateUserProfile(currentUser.id, { avatar_base: emoji })}
             className={`text-3xl p-3 rounded-2xl border-2 transition-all shrink-0 ${
-              (profile.avatarBase || '🧑') === emoji 
+              (profile.avatar_base || '🧑') === emoji 
                 ? 'border-primary bg-indigo-50 shadow-sm scale-110' 
                 : 'border-slate-200 bg-card hover:border-indigo-200 hover:bg-slate-50'
             }`}

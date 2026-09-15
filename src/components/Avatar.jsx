@@ -5,7 +5,7 @@ import { useStore } from '../context/StoreContext';
 export default function Avatar({ userId, className, accessoryClassName = "top-[-20%]" }) {
   const { userProfiles } = useStore();
   const profile = userProfiles?.[userId] || {};
-  const base = profile.avatarBase || '🧑';
+  const base = profile.avatar_base || '🧑';
   const accId = profile.accessory || 'none';
   const accObj = ACCESSORIES.find(a => a.id === accId) || {};
 
