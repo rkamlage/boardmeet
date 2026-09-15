@@ -14,10 +14,12 @@ export const ACCESSORIES = [
 
 export default function Profile() {
   const { currentUser, logout, events, userProfiles, updateUserProfile } = useStore();
+  const profile = userProfiles[currentUser?.id] || {};
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState(profile.name || currentUser?.name || '');
   
   if (!currentUser) return null;
 
-  const profile = userProfiles[currentUser.id] || {};
   const selectedAccessory = profile.accessory || 'none';
 
   const handleSelect = (id) => {
@@ -75,7 +77,38 @@ export default function Profile() {
           )}
         </div>
 
-        <h3 className="text-2xl font-extrabold text-text m-0">{currentUser.name}</h3>
+        {isEditingName ? (
+          <div className="flex gap-2 items-center mt-2 w-full max-w-xs">
+            <input 
+              type="text" 
+              value={editNameValue}
+              onChange={(e) => setEditNameValue(e.target.value)}
+              className="flex-1 p-2 border border-slate-300 rounded-lg text-center font-bold"
+              autoFocus
+            />
+            <button 
+              onClick={() => {
+                if(editNameValue.trim()) {
+                  updateUserProfile(currentUser.id, { name: editNameValue.trim() });
+                  setIsEditingName(false);
+                }
+              }}
+              className="bg-primary text-white p-2 rounded-lg"
+            >
+              Speichern
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 mt-2">
+            <h3 className="text-2xl font-extrabold text-text m-0">{profile.name || currentUser.name}</h3>
+            <button 
+              onClick={() => setIsEditingName(true)}
+              className="text-xs font-bold text-primary bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100"
+            >
+              Ändern
+            </button>
+          </div>
+        )}
         
         <div className="flex gap-6 mt-6 w-full justify-center">
           <div className="text-center bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
