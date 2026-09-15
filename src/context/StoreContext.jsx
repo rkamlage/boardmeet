@@ -55,6 +55,16 @@ export function StoreProvider({ children }) {
     return data;
   };
 
+  const loginWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) throw error;
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
   };
@@ -383,6 +393,7 @@ export function StoreProvider({ children }) {
     currentUser,
     authLoading,
     login,
+    loginWithGoogle,
     signup,
     logout,
     groups,
