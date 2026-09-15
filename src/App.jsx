@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useStore } from './context/StoreContext';
 import Layout from './components/Layout';
@@ -14,9 +14,24 @@ import Login from './pages/Login';
 import Games from './pages/Games';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import Onboarding from './components/Onboarding';
 
 function App() {
   const { currentUser, authLoading } = useStore();
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      const emailPrefix = currentUser.email?.split('@')[0];
+      const hasOnboardedFlag = localStorage.getItem('boardmeet_onboarded_' + currentUser.id);
+      
+      if (!hasOnboardedFlag && currentUser.name === emailPrefix) {
+        setNeedsOnboarding(true);
+      } else {
+        setNeedsOnboarding(false);
+      }
+    }
+  }, [currentUser]);
 
   if (authLoading) {
     return <div className="flex h-screen items-center justify-center bg-background"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
@@ -24,6 +39,10 @@ function App() {
 
   if (!currentUser) {
     return <Login />;
+  }
+
+  if (needsOnboarding) {
+    return <Onboarding onComplete={() => setNeedsOnboarding(false)} />;
   }
 
   return (
