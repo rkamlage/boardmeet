@@ -239,8 +239,8 @@ END:VCALENDAR`;
           <div className="flex flex-col gap-3">
             {event.games.map(g => (
               <div key={g.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 p-4 bg-background rounded-xl border border-slate-200">
-                <div>
-                  <strong className="block text-text font-bold mb-1">{g.name}</strong>
+                <div className="min-w-0 flex-1">
+                  <strong className="block text-text font-bold mb-1 break-words">{g.name}</strong>
                   <div className="flex gap-3 items-center">
                     <span className="bg-indigo-50 text-primary border border-indigo-100 px-2 py-0.5 rounded-full text-xs font-bold">{g.votes.length} votes</span>
                     {g.description?.startsWith('Link: ') ? (

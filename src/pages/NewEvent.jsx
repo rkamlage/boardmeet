@@ -5,10 +5,11 @@ import { Calendar, MapPin, Edit3, Users } from 'lucide-react';
 
 export default function NewEvent() {
   const { id: urlGroupId } = useParams();
-  const { createEvent, locations, addLocation, groups } = useStore();
+  const { createEvent, locations, addLocation, groups, currentUser } = useStore();
   const navigate = useNavigate();
 
-  const [selectedGroupId, setSelectedGroupId] = useState(urlGroupId || (groups?.[0]?.id || ''));
+  const myGroups = groups?.filter(g => g.members.includes(currentUser.id)) || [];
+  const [selectedGroupId, setSelectedGroupId] = useState(urlGroupId || (myGroups[0]?.id || ''));
 
   const [formData, setFormData] = useState({
     title: '',
@@ -98,7 +99,7 @@ export default function NewEvent() {
               className="w-full p-3 border border-slate-300 rounded-xl bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all mb-4" 
               required
             >
-              {groups?.map(g => (
+              {myGroups.map(g => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </select>
