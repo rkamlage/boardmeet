@@ -2,10 +2,11 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { Calendar as CalendarIcon, Users, ChevronLeft, Plus, Crown } from 'lucide-react';
+import { ACCESSORIES } from './Profile';
 
 export default function GroupDetail() {
   const { id } = useParams();
-  const { groups, events, currentUser, deleteGroup } = useStore();
+  const { groups, events, currentUser, deleteGroup, userProfiles } = useStore();
   const navigate = useNavigate();
   
   const group = groups.find(g => g.id === id);
@@ -79,15 +80,26 @@ export default function GroupDetail() {
         </button>
 
         <ul className="divide-y divide-slate-100">
-          {group.members.map(m => (
-            <li key={m} className="py-3 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
-                {m === currentUser.id ? 'Y' : m[0].toUpperCase()}
-              </div>
-              <span className="flex-1 font-medium">{m === currentUser.id ? 'You' : m}</span>
-              {m === group.adminId && <Crown size={18} className="text-yellow-500 drop-shadow-sm" />}
-            </li>
-          ))}
+          {group.members.map(m => {
+            const accId = userProfiles?.[m]?.accessory || 'none';
+            const accObj = ACCESSORIES.find(a => a.id === accId) || {};
+            const displayName = m === currentUser.id ? `Du (${currentUser.name || userProfiles?.[m]?.name || 'Ohne Namen'})` : (userProfiles?.[m]?.name || m);
+            
+            return (
+              <li key={m} className="py-3 flex items-center gap-3">
+                <div className="relative w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold border border-slate-200 text-xl">
+                  🧑
+                  {accObj.icon && (
+                    <div className={`absolute text-sm z-10 drop-shadow-sm ${accObj.id === 'glasses' || accObj.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
+                      {accObj.icon}
+                    </div>
+                  )}
+                </div>
+                <span className="flex-1 font-medium">{displayName}</span>
+                {m === group.adminId && <Crown size={18} className="text-yellow-500 drop-shadow-sm" />}
+              </li>
+            );
+          })}
         </ul>
       </div>
 
