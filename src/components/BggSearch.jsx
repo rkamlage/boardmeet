@@ -127,8 +127,26 @@ export default function GameSearch({ eventId }) {
                 </div>
                 <button 
                   className="bg-primary hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg flex items-center justify-center shadow-sm transition-all text-sm shrink-0" 
-                  onClick={() => {
-                    addGameToEvent(eventId, g.id, g.name);
+                  onClick={async () => {
+                    let gameIdToUse = g.id;
+                    const exists = gamesCatalog.some(c => c.id === g.id);
+                    if (!exists) {
+                      // Predefined game not in DB yet
+                      try {
+                        const added = await addGameToCatalog({
+                          name: g.name,
+                          icon: g.icon,
+                          description: g.description,
+                          isExpansion: g.isExpansion || false,
+                          bggImage: null
+                        });
+                        gameIdToUse = added.id;
+                      } catch (err) {
+                        alert("Fehler beim Hinzufügen des Spiels zur Datenbank.");
+                        return;
+                      }
+                    }
+                    await addGameToEvent(eventId, gameIdToUse, g.name);
                     setQuery('');
                   }}
                 >
