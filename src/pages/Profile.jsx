@@ -68,7 +68,7 @@ export default function Profile() {
           🧑
           {/* Overlay Accessory */}
           {activeAccessory && activeAccessory.icon && (
-            <div className={`absolute text-5xl z-10 drop-shadow-sm ${activeAccessory.id === 'glasses' || activeAccessory.id === 'sunglasses' ? 'top-[15%]' : 'top-[-20%]'}`}>
+            <div className={`absolute text-5xl z-10 drop-shadow-sm ${activeAccessory.id === 'glasses' || activeAccessory.id === 'sunglasses' ? 'top-[28%]' : 'top-[-20%]'}`}>
               {activeAccessory.icon}
             </div>
           )}

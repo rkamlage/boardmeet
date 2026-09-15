@@ -18,6 +18,13 @@ export default function Layout() {
       {/* Top Desktop/Mobile Nav */}
       <nav className="flex justify-between items-center p-4 bg-card border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <Link to="/" className="font-extrabold text-2xl text-primary tracking-tight">🎲 BoardMeet</Link>
+        <div className="hidden sm:flex items-center space-x-6">
+          <Link to="/" className={`font-semibold ${getNavColor('/')} hover:text-primary transition-colors`}>Home</Link>
+          <Link to="/groups" className={`font-semibold ${getNavColor('/groups')} hover:text-primary transition-colors`}>Groups</Link>
+          <Link to="/events" className={`font-semibold ${getNavColor('/events')} hover:text-primary transition-colors`}>Events</Link>
+          <Link to="/games" className={`font-semibold ${getNavColor('/games')} hover:text-primary transition-colors`}>Ranking</Link>
+          <Link to="/profile" className={`font-semibold ${getNavColor('/profile')} hover:text-primary transition-colors`}>Profile</Link>
+        </div>
         <div className="flex space-x-2">
           <button onClick={logout} className="p-2 text-muted hover:text-primary hover:bg-slate-100 rounded-xl transition-colors">
             <LogOut size={20} />

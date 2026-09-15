@@ -41,14 +41,14 @@ export default function GameSearch({ eventId }) {
     setIsSearching(false);
     
     if (details) {
-      const addedGame = addGameToCatalog({
+      const addedGame = await addGameToCatalog({
         name: details.name,
         icon: '🎲', // Default icon for BGG imported games
         description: details.description,
         isExpansion: bggGame.type === 'boardgameexpansion',
         bggImage: details.thumbnail
       });
-      addGameToEvent(eventId, addedGame.id, addedGame.name);
+      await addGameToEvent(eventId, addedGame.id, addedGame.name);
       
       setQuery('');
       setBggQuery('');

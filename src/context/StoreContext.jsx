@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const StoreContext = createContext();
 
@@ -8,22 +9,32 @@ export function useStore() {
 }
 
 export function StoreProvider({ children }) {
+  const queryClient = useQueryClient();
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  const handleSession = async (session) => {
+    const user = session.user;
+    const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
+    if (!profile) {
+      await supabase.from('profiles').insert({ id: user.id, email: user.email, name: user.email.split('@')[0] });
+    }
+    setCurrentUser({ id: user.id, name: user.email.split('@')[0], email: user.email });
+    setAuthLoading(false);
+  };
+
   useEffect(() => {
-    // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        setCurrentUser({ id: session.user.id, name: session.user.email.split('@')[0], email: session.user.email });
+        handleSession(session);
+      } else {
+        setAuthLoading(false);
       }
-      setAuthLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        setCurrentUser({ id: session.user.id, name: session.user.email.split('@')[0], email: session.user.email });
+        handleSession(session);
       } else {
         setCurrentUser(null);
       }
@@ -48,227 +59,282 @@ export function StoreProvider({ children }) {
     await supabase.auth.signOut();
   };
 
-  // Default Data
-  const defaultGroups = [{ id: 'g1', name: 'Weekly Boardgamers', adminId: 'u1', members: ['u1', 'u2'] }];
-  const defaultLocations = [{ id: 'loc1', name: "Alex's Living Room", maxPlayers: 4 }];
-  const defaultEvents = [{ id: 'e1', groupId: 'g1', title: 'Friday Game Night', date: '2023-11-10T19:00:00', locationId: 'loc1', maxPlayers: 4, attendees: ['u1'], waitlist: [], bringList: [], games: [] }];
-  const defaultGames = [{ id: '13', name: 'Catan', icon: '🌾', description: 'Baue Siedlungen.', link: 'https://boardgamegeek.com/boardgame/13' }];
-
-  // State with LocalStorage
-  const [groups, setGroups] = useState(() => JSON.parse(localStorage.getItem('bm_groups')) || defaultGroups);
-  const [locations, setLocations] = useState(() => JSON.parse(localStorage.getItem('bm_locations')) || defaultLocations);
-  const [events, setEvents] = useState(() => JSON.parse(localStorage.getItem('bm_events')) || defaultEvents);
-  const [gamesCatalog, setGamesCatalog] = useState(() => JSON.parse(localStorage.getItem('bm_games')) || defaultGames);
-  const [userProfiles, setUserProfiles] = useState(() => JSON.parse(localStorage.getItem('bm_profiles')) || {});
-
-  // Persist on change
-  useEffect(() => {
-    localStorage.setItem('bm_groups', JSON.stringify(groups));
-    localStorage.setItem('bm_locations', JSON.stringify(locations));
-    localStorage.setItem('bm_events', JSON.stringify(events));
-    localStorage.setItem('bm_games', JSON.stringify(gamesCatalog));
-    localStorage.setItem('bm_profiles', JSON.stringify(userProfiles));
-  }, [groups, locations, events, gamesCatalog, userProfiles]);
-
-  const updateUserProfile = (userId, data) => {
-    setUserProfiles(prev => ({ ...prev, [userId]: { ...prev[userId], ...data } }));
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      setGroups(prevGroups => prevGroups.map(g => {
-        if (g.id === 'g1' && !g.members.includes(currentUser.id)) {
-          return { ...g, members: [...g.members, currentUser.id] };
-        }
-        return g;
-      }));
-    }
-  }, [currentUser]);
-
-  const createGroup = (name) => {
-    const newGroup = {
-      id: `g${Date.now()}`,
-      name,
-      adminId: currentUser.id,
-      members: [currentUser.id]
-    };
-    setGroups([...groups, newGroup]);
-  };
-
-  // Event Actions
-  const createEvent = (eventData) => {
-    const newEvent = {
-      id: `e${Date.now()}`,
-      ...eventData,
-      attendees: [currentUser.id],
-      waitlist: [],
-      bringList: [],
-      games: []
-    };
-    setEvents([...events, newEvent]);
-  };
-
-  const joinEvent = (eventId) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        if (ev.attendees.includes(currentUser.id) || ev.waitlist.includes(currentUser.id)) {
-          return ev; // already in
-        }
-        if (ev.attendees.length >= ev.maxPlayers) {
-          // Add to waitlist
-          return { ...ev, waitlist: [...ev.waitlist, currentUser.id] };
-        } else {
-          // Add to attendees
-          return { ...ev, attendees: [...ev.attendees, currentUser.id] };
-        }
-      }
-      return ev;
-    }));
-  };
+  // ----------------------------------------------------
+  // QUERIES
+  // ----------------------------------------------------
   
-  const leaveEvent = (eventId) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        if (ev.attendees.includes(currentUser.id)) {
-          const newAttendees = ev.attendees.filter(id => id !== currentUser.id);
-          const newWaitlist = [...ev.waitlist];
-          
-          if (newWaitlist.length > 0) {
-            const nextInLine = newWaitlist.shift();
-            newAttendees.push(nextInLine);
-          }
-          
-          return { ...ev, attendees: newAttendees, waitlist: newWaitlist };
-        } 
-        else if (ev.waitlist.includes(currentUser.id)) {
-          return { ...ev, waitlist: ev.waitlist.filter(id => id !== currentUser.id) };
-        }
+  const { data: rawProfiles = [] } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: rawGroups = [] } = useQuery({
+    queryKey: ['groups'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('groups').select('*, group_members(user_id)');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: rawLocations = [] } = useQuery({
+    queryKey: ['locations'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('locations').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: rawGames = [] } = useQuery({
+    queryKey: ['gamesCatalog'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('games_catalog').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: rawEvents = [] } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('events')
+        .select(`
+          *,
+          event_attendees(user_id, status),
+          event_guests(id, name, status, parent_user_id),
+          event_games(game_id, votes, games_catalog(id, name, icon)),
+          event_matches(id, game_id, winner_id, created_at),
+          bring_list(id, item, assignee_id)
+        `);
+      if (error) {
+        console.error('Error fetching events:', error);
+        throw error;
       }
-      return ev;
+      return data;
+    }
+  });
+
+  // ----------------------------------------------------
+  // MAPPERS (Translating DB format to UI format)
+  // ----------------------------------------------------
+
+  const userProfiles = useMemo(() => {
+    const dict = {};
+    rawProfiles.forEach(p => {
+      dict[p.id] = p;
+    });
+    return dict;
+  }, [rawProfiles]);
+
+  const groups = useMemo(() => {
+    return rawGroups.map(g => ({
+      id: g.id,
+      name: g.name,
+      adminId: g.created_by,
+      members: g.group_members?.map(m => m.user_id) || []
     }));
+  }, [rawGroups]);
+
+  const locations = useMemo(() => {
+    return rawLocations.map(l => ({
+      id: l.id,
+      name: l.name,
+      maxPlayers: l.max_players
+    }));
+  }, [rawLocations]);
+
+  const gamesCatalog = useMemo(() => {
+    return rawGames.map(g => ({
+      ...g,
+      bggImage: g.bgg_image,
+      isExpansion: g.is_expansion
+    }));
+  }, [rawGames]);
+
+  const events = useMemo(() => {
+    return rawEvents.map(e => {
+      const attendees = e.event_attendees?.filter(a => a.status === 'attending').map(a => a.user_id) || [];
+      const waitlist = e.event_attendees?.filter(a => a.status === 'waitlist').map(a => a.user_id) || [];
+      
+      const guestAttendees = e.event_guests?.filter(a => a.status === 'attending').map(a => `${a.parent_user_id}_guest_${a.id}`) || [];
+      const guestWaitlist = e.event_guests?.filter(a => a.status === 'waitlist').map(a => `${a.parent_user_id}_guest_${a.id}`) || [];
+
+      return {
+        id: e.id,
+        groupId: e.group_id,
+        locationId: e.location_id,
+        title: e.title,
+        date: e.date,
+        maxPlayers: e.max_players,
+        attendees: [...attendees, ...guestAttendees],
+        waitlist: [...waitlist, ...guestWaitlist],
+        games: e.event_games?.map(eg => ({
+          id: eg.game_id,
+          name: eg.games_catalog?.name || 'Unknown',
+          icon: eg.games_catalog?.icon || '🎲',
+          votes: eg.votes || []
+        })) || [],
+        matches: e.event_matches?.map(m => ({
+          id: m.id,
+          gameId: m.game_id,
+          winnerId: m.winner_id,
+          timestamp: m.created_at
+        })) || [],
+        bringList: e.bring_list?.map(b => ({
+          id: b.id,
+          item: b.item,
+          assignee: b.assignee_id
+        })) || []
+      };
+    });
+  }, [rawEvents]);
+
+  // ----------------------------------------------------
+  // MUTATIONS (Write to DB and update cache)
+  // ----------------------------------------------------
+
+  const updateUserProfile = async (userId, data) => {
+    await supabase.from('profiles').update(data).eq('id', userId);
+    queryClient.invalidateQueries(['profiles']);
   };
 
-  const addGuest = (eventId) => {
-    const guestId = `${currentUser.id}_guest_${Date.now()}`;
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        if (ev.attendees.length >= ev.maxPlayers) {
-          return { ...ev, waitlist: [...ev.waitlist, guestId] };
-        } else {
-          return { ...ev, attendees: [...ev.attendees, guestId] };
-        }
+  const createGroup = async (name) => {
+    const { data: group, error } = await supabase.from('groups').insert({ name, created_by: currentUser.id }).select().single();
+    if (error) console.error('Error creating group:', error);
+    
+    if (group) {
+      const { error: memberError } = await supabase.from('group_members').insert({ group_id: group.id, user_id: currentUser.id, role: 'admin' });
+      if (memberError) console.error('Error adding group member:', memberError);
+      queryClient.invalidateQueries(['groups']);
+    }
+  };
+
+  const createEvent = async (eventData) => {
+    const { data: ev, error } = await supabase.from('events').insert({
+      title: eventData.title,
+      date: eventData.date,
+      group_id: eventData.groupId,
+      location_id: eventData.locationId,
+      max_players: eventData.maxPlayers,
+      created_by: currentUser.id
+    }).select().single();
+    if (error) console.error('Error creating event:', error);
+
+    if (ev) {
+      const { error: rsvpError } = await supabase.from('event_attendees').insert({ event_id: ev.id, user_id: currentUser.id, status: 'attending' });
+      if (rsvpError) console.error('Error RSVPing to event:', rsvpError);
+      queryClient.invalidateQueries(['events']);
+    }
+  };
+
+  const joinEvent = async (eventId) => {
+    const ev = rawEvents.find(e => e.id === eventId);
+    if (!ev) return;
+    const currentAttendees = ev.event_attendees?.filter(a => a.status === 'attending').length || 0;
+    const status = currentAttendees >= ev.max_players ? 'waitlist' : 'attending';
+    
+    await supabase.from('event_attendees').insert({ event_id: eventId, user_id: currentUser.id, status });
+    queryClient.invalidateQueries(['events']);
+  };
+
+  const leaveEvent = async (eventId) => {
+    await supabase.from('event_attendees').delete().eq('event_id', eventId).eq('user_id', currentUser.id);
+    
+    // Auto-promote waitlist logic is tricky purely in client, but let's do a basic promotion if possible
+    const ev = rawEvents.find(e => e.id === eventId);
+    if (ev) {
+      const attending = ev.event_attendees?.filter(a => a.status === 'attending' && a.user_id !== currentUser.id) || [];
+      const waitlist = ev.event_attendees?.filter(a => a.status === 'waitlist') || [];
+      if (attending.length < ev.max_players && waitlist.length > 0) {
+        // Promote first waitlist
+        const first = waitlist.sort((a,b) => new Date(a.joined_at) - new Date(b.joined_at))[0];
+        await supabase.from('event_attendees').update({ status: 'attending' }).eq('event_id', eventId).eq('user_id', first.user_id);
       }
-      return ev;
-    }));
+    }
+    queryClient.invalidateQueries(['events']);
   };
 
-  const addGameToEvent = (eventId, gameId, gameName) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId && !ev.games.find(g => g.id === gameId)) {
-        return { ...ev, games: [...ev.games, { id: gameId, name: gameName, votes: [] }] };
-      }
-      return ev;
-    }));
+  const addGuest = async (eventId) => {
+    const ev = rawEvents.find(e => e.id === eventId);
+    if (!ev) return;
+    const currentAttendees = ev.event_attendees?.filter(a => a.status === 'attending').length + (ev.event_guests?.filter(a => a.status === 'attending').length || 0) || 0;
+    const status = currentAttendees >= ev.max_players ? 'waitlist' : 'attending';
+    
+    await supabase.from('event_guests').insert({ event_id: eventId, parent_user_id: currentUser.id, name: 'Guest', status });
+    queryClient.invalidateQueries(['events']);
   };
 
-  const voteGame = (eventId, gameId) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        const updatedGames = ev.games.map(g => {
-          if (g.id === gameId) {
-            const hasVoted = g.votes.includes(currentUser.id);
-            const newVotes = hasVoted 
-              ? g.votes.filter(id => id !== currentUser.id)
-              : [...g.votes, currentUser.id];
-            return { ...g, votes: newVotes };
-          }
-          return g;
-        });
-        return { ...ev, games: updatedGames };
-      }
-      return ev;
-    }));
+  const addGameToEvent = async (eventId, gameId, gameName) => {
+    await supabase.from('event_games').insert({ event_id: eventId, game_id: gameId });
+    queryClient.invalidateQueries(['events']);
   };
 
-  const toggleVote = (eventId, gameId, userId) => {
-    setEvents(events.map(e => {
-      if (e.id === eventId) {
-        return {
-          ...e,
-          games: e.games.map(g => {
-            if (g.id === gameId) {
-              const hasVoted = g.votes.includes(userId);
-              return { ...g, votes: hasVoted ? g.votes.filter(u => u !== userId) : [...g.votes, userId] };
-            }
-            return g;
-          })
-        };
-      }
-      return e;
-    }));
+  const removeGameFromEvent = async (eventId, gameId) => {
+    await supabase.from('event_games').delete().eq('event_id', eventId).eq('game_id', gameId);
+    queryClient.invalidateQueries(['events']);
   };
 
-  const recordMatch = (eventId, gameId, winnerId) => {
-    setEvents(events.map(e => {
-      if (e.id === eventId) {
-        const newMatch = { id: `m${Date.now()}`, gameId, winnerId, timestamp: new Date().toISOString() };
-        return { ...e, matches: [...(e.matches || []), newMatch] };
-      }
-      return e;
-    }));
+  const voteGame = async (eventId, gameId) => {
+    toggleVote(eventId, gameId, currentUser.id);
   };
 
-  const addBringListItem = (eventId, item, assignee) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        return { ...ev, bringList: [...ev.bringList, { id: `b${Date.now()}`, item, assignee }] };
-      }
-      return ev;
-    }));
+  const toggleVote = async (eventId, gameId, userId) => {
+    const ev = rawEvents.find(e => e.id === eventId);
+    if (!ev) return;
+    const game = ev.event_games?.find(g => g.game_id === gameId);
+    let newVotes = game?.votes || [];
+    
+    if (newVotes.includes(userId)) {
+      newVotes = newVotes.filter(id => id !== userId);
+    } else {
+      newVotes = [...newVotes, userId];
+    }
+    
+    await supabase.from('event_games').update({ votes: newVotes }).eq('event_id', eventId).eq('game_id', gameId);
+    queryClient.invalidateQueries(['events']);
   };
 
-  const removeBringListItem = (eventId, itemId) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        return { ...ev, bringList: ev.bringList.filter(b => b.id !== itemId) };
-      }
-      return ev;
-    }));
+  const recordMatch = async (eventId, gameId, winnerId) => {
+    await supabase.from('event_matches').insert({ event_id: eventId, game_id: gameId, winner_id: winnerId });
+    queryClient.invalidateQueries(['events']);
   };
 
-  const removeGameFromEvent = (eventId, gameId) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        return { ...ev, games: ev.games.filter(g => g.id !== gameId) };
-      }
-      return ev;
-    }));
+  const addBringListItem = async (eventId, item, assignee) => {
+    await supabase.from('bring_list').insert({ event_id: eventId, item, assignee_id: assignee });
+    queryClient.invalidateQueries(['events']);
   };
 
-  const addLocation = (name, maxPlayers) => {
-    const newLoc = { id: `loc${Date.now()}`, name, maxPlayers };
-    setLocations([...locations, newLoc]);
-    return newLoc;
+  const removeBringListItem = async (eventId, itemId) => {
+    await supabase.from('bring_list').delete().eq('id', itemId);
+    queryClient.invalidateQueries(['events']);
   };
 
-  const addGameToCatalog = (gameData) => {
-    const newGame = {
-      id: `gc_${Date.now()}`,
+  const addLocation = async (name, maxPlayers) => {
+    const { data } = await supabase.from('locations').insert({ name, max_players: maxPlayers, created_by: currentUser.id }).select().single();
+    queryClient.invalidateQueries(['locations']);
+    return data;
+  };
+
+  const addGameToCatalog = async (gameData) => {
+    const { data } = await supabase.from('games_catalog').insert({
       name: gameData.name,
       icon: gameData.icon || '🎲',
-      description: gameData.description || 'Ein neues Spiel in unserer Datenbank.',
-      isExpansion: gameData.isExpansion || false,
-      baseGameId: gameData.baseGameId || null,
-      link: `https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(gameData.name)}`
-    };
-    setGamesCatalog([...gamesCatalog, newGame]);
-    return newGame;
+      description: gameData.description || '',
+      is_expansion: gameData.isExpansion || false,
+      bgg_image: gameData.bggImage || null
+    }).select().single();
+    queryClient.invalidateQueries(['gamesCatalog']);
+    return data;
   };
 
   const formatUserName = (userId) => {
-    if (currentUser && userId === currentUser.id) {
-      return currentUser.email ? currentUser.email.split('@')[0] : 'Du';
-    }
+    if (currentUser && userId === currentUser.id) return currentUser.name || 'Du';
     if (userId.includes('_guest_')) {
       const parent = userId.split('_guest_')[0];
       const parentName = parent === currentUser?.id ? 'Dein' : (userProfiles[parent]?.name || parent);
@@ -279,6 +345,7 @@ export function StoreProvider({ children }) {
 
   const value = {
     currentUser,
+    authLoading,
     login,
     signup,
     logout,

@@ -14,7 +14,11 @@ import Games from './pages/Games';
 import Profile from './pages/Profile';
 
 function App() {
-  const { currentUser } = useStore();
+  const { currentUser, authLoading } = useStore();
+
+  if (authLoading) {
+    return <div className="flex h-screen w-screen items-center justify-center bg-background text-primary"><div className="animate-spin text-4xl">🎲</div></div>;
+  }
 
   if (!currentUser) {
     return <Login />;

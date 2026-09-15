@@ -21,15 +21,15 @@ export default function NewEvent() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let locId = formData.locationId;
     let maxPlayers = 4;
 
     if (locId === 'custom') {
-      const newLoc = addLocation(customLocation.name, parseInt(customLocation.maxPlayers, 10));
+      const newLoc = await addLocation(customLocation.name, parseInt(customLocation.maxPlayers, 10));
       locId = newLoc.id;
-      maxPlayers = newLoc.maxPlayers;
+      maxPlayers = newLoc.max_players; // DB uses max_players
     } else {
       const selectedLocation = locations.find(l => l.id === locId);
       maxPlayers = selectedLocation ? selectedLocation.maxPlayers : 4;
@@ -46,19 +46,21 @@ export default function NewEvent() {
     if (recurrence === 'biweekly') { count = 4; daysToAdd = 14; }
     if (recurrence === 'monthly') { count = 4; daysToAdd = 28; }
     
+    const promises = [];
     for (let i = 0; i < count; i++) {
       const eventDate = new Date(baseDate);
       eventDate.setDate(eventDate.getDate() + (i * daysToAdd));
       
-      createEvent({
+      promises.push(createEvent({
         groupId,
         title: count > 1 ? `${formData.title} (#${i + 1})` : formData.title,
         date: eventDate.toISOString().slice(0, 16),
         locationId: locId,
         maxPlayers: maxPlayers
-      });
+      }));
     }
 
+    await Promise.all(promises);
     navigate(`/groups/${groupId}`);
   };
 
