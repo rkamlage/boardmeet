@@ -212,7 +212,11 @@ export function StoreProvider({ children }) {
   // ----------------------------------------------------
 
   const updateUserProfile = async (userId, data) => {
-    await supabase.from('profiles').update(data).eq('id', userId);
+    const { error } = await supabase.from('profiles').update(data).eq('id', userId);
+    if (error) {
+      console.error('Error updating profile:', error);
+      alert('Fehler beim Speichern: ' + error.message);
+    }
     queryClient.invalidateQueries(['profiles']);
   };
 
