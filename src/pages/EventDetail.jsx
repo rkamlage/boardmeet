@@ -8,7 +8,7 @@ import { ACCESSORIES } from './Profile';
 export default function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, userProfiles, deleteEvent } = useStore();
+  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, removeMatch, userProfiles, deleteEvent } = useStore();
   
   const [showSearch, setShowSearch] = useState(false);
   const [showBringListInput, setShowBringListInput] = useState(false);
@@ -254,20 +254,46 @@ END:VCALENDAR`;
                   >
                     {g.votes.includes(currentUser.id) ? 'Voted' : 'Vote'}
                   </button>
-                  <button 
-                    className="py-1.5 px-3 rounded-lg font-semibold text-xs transition-all bg-yellow-50 text-yellow-600 border border-yellow-200 hover:bg-yellow-100 shadow-sm"
-                    onClick={() => recordMatch(event.id, g.id, currentUser.id)}
-                  >
-                    Ich habe gewonnen! 🏆
-                  </button>
+                  {event.createdBy === currentUser.id && (
+                    <div className="flex gap-2 items-center">
+                      <select 
+                        id={`winner-select-${g.id}`} 
+                        className="p-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none w-full shadow-sm"
+                      >
+                        {event.attendees.map(a => (
+                          <option key={a} value={a}>{formatName(a)}</option>
+                        ))}
+                      </select>
+                      <button 
+                        className="py-1.5 px-3 rounded-lg font-semibold text-xs transition-all bg-yellow-50 text-yellow-600 border border-yellow-200 hover:bg-yellow-100 shadow-sm shrink-0 whitespace-nowrap"
+                        onClick={() => {
+                          const winnerId = document.getElementById(`winner-select-${g.id}`).value;
+                          recordMatch(event.id, g.id, winnerId);
+                        }}
+                      >
+                        Sieg eintragen
+                      </button>
+                    </div>
+                  )}
 
                   {/* Matches List */}
                   {event.matches && event.matches.filter(m => m.gameId === g.id).length > 0 && (
                     <div className="mt-1 text-xs bg-slate-50 border border-slate-100 p-2 rounded-lg">
                       <strong className="block mb-1 text-slate-500">Siege:</strong>
-                      <ul className="text-yellow-600 font-bold space-y-0.5 ml-1">
+                      <ul className="text-yellow-600 font-bold space-y-1 ml-1">
                         {event.matches.filter(m => m.gameId === g.id).map(m => (
-                          <li key={m.id} className="flex items-center gap-1">🥇 {formatName(m.winnerId)}</li>
+                          <li key={m.id} className="flex justify-between items-center group/match">
+                            <span className="flex items-center gap-1 truncate">🥇 {formatName(m.winnerId)}</span>
+                            {event.createdBy === currentUser.id && (
+                              <button 
+                                onClick={() => removeMatch(m.id)}
+                                className="text-red-400 hover:text-red-600 px-2 rounded opacity-0 group-hover/match:opacity-100 transition-opacity"
+                                title="Sieg entfernen"
+                              >
+                                ✖
+                              </button>
+                            )}
+                          </li>
                         ))}
                       </ul>
                     </div>
