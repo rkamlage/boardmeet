@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { BarChart, Users, Calendar, Gamepad2, ArrowLeft } from 'lucide-react';
+import { BarChart, Users, Calendar, Gamepad2, ArrowLeft, Trash2, ExternalLink, Eye } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
+import Onboarding from '../components/Onboarding';
 
 export default function Admin() {
   const { currentUser, userProfiles, groups, events, gamesCatalog } = useStore();
+  const [showOnboardingPreview, setShowOnboardingPreview] = useState(false);
 
   // Check if admin
   if (currentUser?.email !== 'renekamlage@googlemail.com') {
     return <Navigate to="/" replace />;
+  }
+  
+  if (showOnboardingPreview) {
+    return (
+      <div className="relative">
+        <button onClick={() => setShowOnboardingPreview(false)} className="absolute top-4 right-4 z-50 bg-slate-800 text-white px-4 py-2 rounded-xl font-bold shadow-lg">
+          Zurück zum Admin Dashboard
+        </button>
+        <div className="opacity-90 pointer-events-none">
+          <Onboarding onComplete={() => {}} />
+        </div>
+      </div>
+    );
   }
 
   // Calculate some stats
@@ -109,11 +124,40 @@ export default function Admin() {
         <ul className="space-y-3">
           {Object.entries(userProfiles).map(([id, profile]) => (
             <li key={id} className="p-3 bg-background rounded-xl border border-slate-100 flex flex-col">
-              <strong className="font-bold text-text">{profile.name || 'Ohne Namen'}</strong>
-              <span className="text-xs text-muted font-medium">{profile.email || 'Keine Email'}</span>
+              <div className="flex justify-between items-start">
+                <div>
+                  <strong className="font-bold text-text block">{profile.name || 'Ohne Namen'}</strong>
+                  <span className="text-xs text-muted font-medium">{profile.email || 'Keine Email'}</span>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
+        <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-medium flex items-start gap-2">
+          <Trash2 size={16} className="shrink-0 mt-0.5" />
+          <p>
+            Nutzer können aus Sicherheitsgründen nur direkt im <strong>Supabase Dashboard</strong> unter "Authentication" gelöscht werden, damit auch deren Google-Login / Passwort komplett entfernt wird.
+          </p>
+        </div>
+      </div>
+      
+      <div className="mt-6 flex flex-col gap-3">
+        <button 
+          onClick={() => setShowOnboardingPreview(true)}
+          className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all flex justify-center items-center gap-2"
+        >
+          <Eye size={18} />
+          Onboarding-Screen ansehen
+        </button>
+        <a 
+          href="https://supabase.com/dashboard" 
+          target="_blank" 
+          rel="noreferrer"
+          className="w-full bg-background border border-slate-300 hover:bg-slate-50 text-text font-bold py-3 px-4 rounded-xl shadow-sm transition-all flex justify-center items-center gap-2"
+        >
+          <ExternalLink size={18} />
+          Zu Supabase (Nutzer löschen)
+        </a>
       </div>
       
       <div className="mt-8 text-center">
