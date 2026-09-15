@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { User, Trophy, Shield, Star, LogOut } from 'lucide-react';
+import { User, Trophy, Shield, Star, LogOut, Activity, Gamepad2, PieChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const ACCESSORIES = [
@@ -26,24 +26,45 @@ export default function Profile() {
     updateUserProfile(currentUser.id, { accessory: id });
   };
 
-  // Calculate user points
+  // Calculate user points and advanced stats
   let totalPoints = 0;
   let totalWins = 0;
   let totalEvents = 0;
+  let totalMatchesPlayed = 0;
+  
+  const gameStats = {}; // { gameId: { played: 0, wins: 0, name: '' } }
 
   events.forEach(ev => {
-    if (ev.attendees.includes(currentUser.id)) {
+    const isAttending = ev.attendees.includes(currentUser.id);
+    if (isAttending) {
       totalEvents++;
     }
+    
+    // Legacy winner logic
     if (ev.winner && ev.winner.userId === currentUser.id) {
       totalWins++;
       totalPoints += 10;
     }
+    
     if (ev.matches) {
       ev.matches.forEach(match => {
+        // If the user attended the event, we assume they participated in the match
+        if (isAttending) {
+          totalMatchesPlayed++;
+          
+          const g = ev.games.find(g => g.id === match.gameId);
+          if (!gameStats[match.gameId]) {
+            gameStats[match.gameId] = { played: 0, wins: 0, name: g ? g.name : 'Unbekanntes Spiel' };
+          }
+          gameStats[match.gameId].played++;
+        }
+        
         if (match.winnerId === currentUser.id) {
           totalWins++;
           totalPoints += 10;
+          if (gameStats[match.gameId]) {
+            gameStats[match.gameId].wins++;
+          }
         }
       });
     }
@@ -51,6 +72,16 @@ export default function Profile() {
 
   // Base points for attending
   totalPoints += (totalEvents * 2);
+  
+  const winRate = totalMatchesPlayed > 0 ? Math.round((totalWins / totalMatchesPlayed) * 100) : 0;
+  
+  // Find favorite game (most played, fallback to most won)
+  let favoriteGame = { name: '-', played: 0, wins: 0 };
+  Object.values(gameStats).forEach(stat => {
+    if (stat.played > favoriteGame.played || (stat.played === favoriteGame.played && stat.wins > favoriteGame.wins)) {
+      favoriteGame = stat;
+    }
+  });
 
   const activeAccessory = ACCESSORIES.find(a => a.id === selectedAccessory);
 
@@ -110,20 +141,39 @@ export default function Profile() {
           </div>
         )}
         
-        <div className="flex gap-6 mt-6 w-full justify-center">
-          <div className="text-center bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
-            <div className="text-2xl font-bold text-primary">{totalPoints}</div>
-            <div className="text-xs text-muted flex items-center gap-1 mt-1 font-medium"><Star size={12} /> Punkte</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 w-full">
+          <div className="text-center bg-indigo-50 px-4 py-4 rounded-xl border border-indigo-100 shadow-sm">
+            <div className="text-2xl font-black text-primary">{totalPoints}</div>
+            <div className="text-xs text-indigo-700 flex items-center justify-center gap-1 mt-1 font-bold"><Star size={14} /> Punkte</div>
           </div>
-          <div className="text-center bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
-            <div className="text-2xl font-bold text-text">{totalWins}</div>
-            <div className="text-xs text-muted flex items-center gap-1 mt-1 font-medium"><Trophy size={12} /> Siege</div>
+          <div className="text-center bg-yellow-50 px-4 py-4 rounded-xl border border-yellow-100 shadow-sm">
+            <div className="text-2xl font-black text-yellow-600">{totalWins}</div>
+            <div className="text-xs text-yellow-700 flex items-center justify-center gap-1 mt-1 font-bold"><Trophy size={14} /> Siege</div>
           </div>
-          <div className="text-center bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
-            <div className="text-2xl font-bold text-text">{totalEvents}</div>
-            <div className="text-xs text-muted flex items-center gap-1 mt-1 font-medium"><Shield size={12} /> Events</div>
+          <div className="text-center bg-green-50 px-4 py-4 rounded-xl border border-green-100 shadow-sm">
+            <div className="text-2xl font-black text-green-600">{winRate}%</div>
+            <div className="text-xs text-green-700 flex items-center justify-center gap-1 mt-1 font-bold"><PieChart size={14} /> Siegquote</div>
+          </div>
+          <div className="text-center bg-slate-50 px-4 py-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="text-2xl font-black text-text">{totalMatchesPlayed}</div>
+            <div className="text-xs text-muted flex items-center justify-center gap-1 mt-1 font-bold"><Activity size={14} /> Matches</div>
           </div>
         </div>
+        
+        {totalMatchesPlayed > 0 && (
+          <div className="w-full mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-4 shadow-sm">
+            <div className="bg-white p-3 rounded-full shadow-sm border border-slate-100 text-primary">
+              <Gamepad2 size={24} />
+            </div>
+            <div>
+              <div className="text-xs text-muted font-bold uppercase tracking-wider">Lieblingsspiel</div>
+              <div className="text-lg font-black text-text">{favoriteGame.name}</div>
+              <div className="text-xs font-medium text-slate-500 mt-0.5">
+                {favoriteGame.played}x gespielt • {favoriteGame.wins} Siege
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {currentUser?.email === 'renekamlage@googlemail.com' && (

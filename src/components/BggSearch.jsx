@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ExternalLink, Search, Plus, Loader } from 'lucide-react';
 import { TOP_GAMES } from '../data/gamesData';
-import { searchBgg, getBggDetails } from '../utils/bggApi';
 
 export default function GameSearch({ eventId }) {
   const { gamesCatalog, addGameToCatalog, addGameToEvent, events } = useStore();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   
@@ -28,39 +26,7 @@ export default function GameSearch({ eventId }) {
     g.name.toLowerCase().includes(query.toLowerCase()) && !existingGameIds.includes(g.id)
   );
 
-  const handleSearchBgg = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    setIsSearching(true);
-    const res = await searchBgg(query);
-    setResults(res);
-    setIsSearching(false);
-  };
 
-  const handleAddBggGame = async (bggGame) => {
-    setIsSearching(true);
-    const details = await getBggDetails(bggGame.id);
-    setIsSearching(false);
-    
-    if (details) {
-      try {
-        const addedGame = await addGameToCatalog({
-          name: details.name,
-          icon: '🎲',
-          description: details.description,
-          isExpansion: bggGame.type === 'boardgameexpansion',
-          bggImage: details.thumbnail
-        });
-        await addGameToEvent(eventId, addedGame.id, addedGame.name);
-        setShowAddForm(false);
-        setQuery('');
-      } catch (err) {
-        // Error already handled in StoreContext
-      }
-    } else {
-      alert("Fehler beim Laden der Details von BGG.");
-    }
-  };
 
   const handleAddManualGame = async (e) => {
     e.preventDefault();
