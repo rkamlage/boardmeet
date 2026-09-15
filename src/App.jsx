@@ -14,7 +14,6 @@ import Login from './pages/Login';
 import Games from './pages/Games';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
-import Navigation from './components/Navigation';
 
 function App() {
   const { currentUser, authLoading } = useStore();

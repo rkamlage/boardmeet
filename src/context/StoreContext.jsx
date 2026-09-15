@@ -368,13 +368,20 @@ export function StoreProvider({ children }) {
   };
 
   const addGameToCatalog = async (gameData) => {
-    const { data } = await supabase.from('games_catalog').insert({
+    const { data, error } = await supabase.from('games_catalog').insert({
       name: gameData.name,
       icon: gameData.icon || '🎲',
       description: gameData.description || '',
       is_expansion: gameData.isExpansion || false,
       bgg_image: gameData.bggImage || null
     }).select().single();
+    
+    if (error) {
+      console.error('Error inserting game:', error);
+      alert('Fehler beim Hinzufügen: ' + error.message);
+      throw error;
+    }
+    
     queryClient.invalidateQueries(['gamesCatalog']);
     return data;
   };
