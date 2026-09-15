@@ -9,7 +9,7 @@ import { ACCESSORIES } from './Profile';
 export default function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, removeMatch, userProfiles, deleteEvent, assignBringListItem, removeBringListItem } = useStore();
+  const { events, locations, currentUser, joinEvent, leaveEvent, addGuest, voteGame, addBringListItem, recordMatch, removeMatch, userProfiles, deleteEvent, assignBringListItem, removeBringListItem, removeGuest } = useStore();
   
   const [showSearch, setShowSearch] = useState(false);
   const [showBringListInput, setShowBringListInput] = useState(false);
@@ -168,24 +168,54 @@ END:VCALENDAR`;
           <Users size={20} className="text-primary" /> Attendees
         </h3>
         <div className="flex flex-wrap gap-6">
-          {event.attendees.map(m => (
-            <div key={m} className="flex flex-col items-center">
-              <Avatar userId={m} className="w-14 h-14 text-3xl" accessoryClassName="text-2xl top-[-20%]" />
-              <span className="text-xs mt-2 font-bold text-text truncate max-w-[80px] text-center">{formatName(m)}</span>
-            </div>
-          ))}
+          {event.attendees.map(m => {
+            const isGuest = m.includes('_guest_');
+            const guestId = isGuest ? m.split('_guest_')[1] : null;
+            const parentUserId = isGuest ? m.split('_guest_')[0] : null;
+            const canRemove = isGuest && (parentUserId === currentUser.id || event.createdBy === currentUser.id);
+
+            return (
+              <div key={m} className="flex flex-col items-center relative group">
+                <Avatar userId={m} className="w-14 h-14 text-3xl" accessoryClassName="text-2xl top-[-20%]" />
+                {canRemove && (
+                  <button 
+                    onClick={() => removeGuest(guestId)}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ✖
+                  </button>
+                )}
+                <span className="text-xs mt-2 font-bold text-text truncate max-w-[80px] text-center">{formatName(m)}</span>
+              </div>
+            );
+          })}
         </div>
         
         {event.waitlist.length > 0 && (
           <div className="mt-8 pt-6 border-t border-slate-100">
             <h4 className="text-muted font-bold text-sm mb-4">Waitlist</h4>
             <div className="flex flex-wrap gap-5">
-              {event.waitlist.map((m, idx) => (
-                <div key={m} className="flex flex-col items-center opacity-60">
-                  <Avatar userId={m} className="w-12 h-12 text-2xl" accessoryClassName="text-xl top-[-20%]" />
-                  <span className="text-[10px] mt-1 font-medium text-text truncate max-w-[70px] text-center">{idx + 1}. {formatName(m)}</span>
-                </div>
-              ))}
+              {event.waitlist.map((m, idx) => {
+                const isGuest = m.includes('_guest_');
+                const guestId = isGuest ? m.split('_guest_')[1] : null;
+                const parentUserId = isGuest ? m.split('_guest_')[0] : null;
+                const canRemove = isGuest && (parentUserId === currentUser.id || event.createdBy === currentUser.id);
+
+                return (
+                  <div key={m} className="flex flex-col items-center opacity-60 relative group">
+                    <Avatar userId={m} className="w-12 h-12 text-2xl" accessoryClassName="text-xl top-[-20%]" />
+                    {canRemove && (
+                      <button 
+                        onClick={() => removeGuest(guestId)}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      >
+                        ✖
+                      </button>
+                    )}
+                    <span className="text-[10px] mt-1 font-medium text-text truncate max-w-[70px] text-center">{idx + 1}. {formatName(m)}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -182,7 +182,11 @@ export default function Profile() {
         <User size={20} className="text-primary" /> Avatar wählen
       </h3>
       
-      <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 mb-6">
+      <div 
+        className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 mb-6"
+        onTouchStart={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         {['🧑', '👩', '👨', '🧔‍♂️', '👱‍♀️', '👴', '👵', '🤖', '👽', '👻', '🐶', '🐱'].map(emoji => (
           <button
             key={emoji}

@@ -317,6 +317,11 @@ export function StoreProvider({ children }) {
     queryClient.invalidateQueries(['events']);
   };
 
+  const removeGuest = async (guestId) => {
+    await supabase.from('event_guests').delete().eq('id', guestId);
+    queryClient.invalidateQueries(['events']);
+  };
+
   const addGameToEvent = async (eventId, gameId, gameName) => {
     await supabase.from('event_games').insert({ event_id: eventId, game_id: gameId });
     queryClient.invalidateQueries(['events']);
@@ -434,6 +439,7 @@ export function StoreProvider({ children }) {
     joinEvent,
     leaveEvent,
     addGuest,
+    removeGuest,
     addBringListItem,
     assignBringListItem,
     removeBringListItem,
