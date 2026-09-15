@@ -4,7 +4,7 @@ import { useStore } from '../context/StoreContext';
 import { Calendar, MapPin, Edit3, Users } from 'lucide-react';
 
 export default function NewEvent() {
-  const { groupId } = useParams();
+  const { id: groupId } = useParams();
   const { createEvent, locations, addLocation } = useStore();
   const navigate = useNavigate();
 
